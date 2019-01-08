@@ -2,12 +2,6 @@
 
 #include "rs_interface.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <unistd.h>
-#include <cstring>
 
 RSInterface::RSInterface(string devPath): _channelId(-1)
 {
@@ -46,82 +40,64 @@ bool RSInterface::open()
         perror(devPath.c_str());
         return false;
     }
-    struct termios newtio0;
+
 
     memset (&newtio0, 0, sizeof (newtio0));
-/*
-    newtio0.c_cflag = _baudRate[BAUDRATE] | _byteSize[BYTESIZE] | CLOCAL | CREAD | PARENB;
-
-	newtio0.c_cflag &= ~CRTSCTS;
-	newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-	newtio0.c_oflag &= ~OPOST;
-
-	//| _parity[PARITY];
-
-    newtio0.c_oflag = 0;
-    newtio0.c_lflag = 0;
-    newtio0.c_cc[VTIME] = 0;    // inter-character timer unused
-    newtio0.c_cc[VMIN]  = 1;    // blocking read until  chars received
-*/
-
-// 9th bit
-	newtio0.c_iflag = IGNBRK;
-
-	newtio0.c_iflag &= ~IGNPAR;
-	newtio0.c_iflag &= ~ISTRIP;
-	newtio0.c_iflag |= INPCK;
-	newtio0.c_iflag |= PARMRK; // Mark all bytes received with 9th bit set by "ff 0"
-	newtio0.c_cflag |= CMSPAR;
-	newtio0.c_cflag &= ~PARODD;	// normal state - space parity
-
-	newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);
-	newtio0.c_cflag = CREAD | CLOCAL;
-	newtio0.c_cflag |= PARENB;
-	newtio0.c_cflag &= ~CSTOPB;
-	newtio0.c_cflag &= ~CSIZE;
-	newtio0.c_cflag |= CS8;
-	newtio0.c_cflag &= ~CRTSCTS;
-	newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-	newtio0.c_oflag &= ~OPOST;
-	newtio0.c_cc[VMIN] = 0;
-	newtio0.c_cc[VTIME]= 0;
-
-/*
-	newtio0.c_iflag = IGNBRK;
-
-	newtio0.c_iflag &= (~IGNPAR);
-	newtio0.c_iflag &= ~(INPCK | ISTRIP);
-	newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);
-	newtio0.c_cflag = CREAD | CLOCAL;
-	//newtio0.c_cflag |= PARENB;
-	newtio0.c_cflag &= ~CSTOPB;
-	newtio0.c_cflag &= ~CSIZE;
-	newtio0.c_cflag |= CS8;
-	newtio0.c_cflag &= ~CRTSCTS;
 
 
-    newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    if(is9thbit)
+    {
+        // 9th bit
+        newtio0.c_iflag = IGNBRK;
 
-    newtio0.c_oflag &= ~OPOST;
+        newtio0.c_iflag &= ~IGNPAR;
+        newtio0.c_iflag &= ~ISTRIP;
+        newtio0.c_iflag |= INPCK;
+        newtio0.c_iflag |= PARMRK; // Mark all bytes received with 9th bit set by "ff 0"
+        newtio0.c_cflag |= CMSPAR;
+        newtio0.c_cflag &= ~PARODD;	// normal state - space parity
 
-    newtio0.c_cc[VMIN] = 0;
-    newtio0.c_cc[VTIME]= 0;
+        newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);
+        newtio0.c_cflag = CREAD | CLOCAL;
+        newtio0.c_cflag |= PARENB;
+        newtio0.c_cflag &= ~CSTOPB;
+        newtio0.c_cflag &= ~CSIZE;
+        newtio0.c_cflag |= CS8;
+        newtio0.c_cflag &= ~CRTSCTS;
+        newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+        newtio0.c_oflag &= ~OPOST;
+        newtio0.c_cc[VMIN] = 0;
+        newtio0.c_cc[VTIME]= 0;
 
-*/
+        cfsetospeed(&newtio0, _baudRate[BAUDRATE] );
+        cfsetispeed(&newtio0, _baudRate[BAUDRATE] );
 
+        tcflush (_channelId, TCIFLUSH);
+        tcsetattr (_channelId, TCSANOW, &newtio0);
 
+        // Set receive with space parity
+        newtio0.c_cflag |= PARENB;
+        newtio0.c_cflag |= CMSPAR;
+        newtio0.c_cflag &= ~PARODD;
+        tcsetattr(_channelId, TCSANOW, &newtio0);
 
-    cfsetospeed(&newtio0, _baudRate[BAUDRATE] );
-    cfsetispeed(&newtio0, _baudRate[BAUDRATE] );
+    }
+    else
+    {
+        newtio0.c_cflag = _baudRate[BAUDRATE] | _byteSize[BYTESIZE] | CLOCAL | CREAD | _parity[PARITY];
 
-    tcflush (_channelId, TCIFLUSH);
-    tcsetattr (_channelId, TCSANOW, &newtio0);
+        newtio0.c_cflag &= ~CRTSCTS;
+        newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+        newtio0.c_oflag &= ~OPOST;
 
-	// Set receive with space parity
-	newtio0.c_cflag |= PARENB;
-	newtio0.c_cflag |= CMSPAR;
-	newtio0.c_cflag &= ~PARODD;
-	tcsetattr(_channelId, TCSANOW, &newtio0);
+        newtio0.c_oflag = 0;
+        newtio0.c_lflag = 0;
+        newtio0.c_cc[VTIME] = 0;    // inter-character timer unused
+        newtio0.c_cc[VMIN]  = 1;    // blocking read until  chars received
+
+        tcflush (_channelId, TCIFLUSH);
+        tcsetattr (_channelId, TCSANOW, &newtio0);
+    }
 
     return true;
 }
@@ -154,5 +130,72 @@ int RSInterface::read(char *data, int size, int timeout)
 
 int RSInterface::write(const char *data, int size)
 {
-    return ::write(_channelId, data, size);
+    if(is9thbit)
+    {
+        for(int iii = 0; iii<size; iii++)
+        {
+            if(putCharWakeup(data[iii]) == -1)
+            {
+                return -1;
+            }
+        }
+        return size;
+    }
+    else
+    {
+        return ::write(_channelId, data, size);
+    }
 }
+
+/******************************************************************************
+** SRL_PutCharWakeup
+**
+** Description:	put char with wakeup bit
+** Input:		symbol - characted to be sent
+** Return:		 1 - OK
+**               0 - nothing wrote
+**				-1 - ERROR
+******************************************************************************/
+int RSInterface::putCharWakeup(unsigned char symbol)
+{
+    int				i, rc;
+    unsigned char	tmp, nine;
+
+    tmp  = symbol;
+    nine = 0;
+
+    for(i=0;i<8;i++)
+    {
+        nine ^= (tmp & 0x01);
+        tmp = tmp >> 1;
+    }
+    if (nine)
+        newtio0.c_cflag = (newtio0.c_cflag | PARENB) & (~PARODD);
+    else
+        newtio0.c_cflag =  newtio0.c_cflag | PARENB | PARODD;
+
+    tcdrain(_channelId);
+    if (tcsetattr(_channelId, TCSADRAIN , &newtio0) == -1)
+        return -1;
+
+    rc = ::write(_channelId, &symbol, 1);
+
+    if(!is9thbit)
+        newtio0.c_cflag = newtio0.c_cflag & (~PARENB) & (~PARODD);
+
+    tcdrain(_channelId);
+
+    if(is9thbit)
+    {
+        usleep(10000);
+        // Set receive with space parity
+        newtio0.c_cflag |= PARENB;
+        newtio0.c_cflag |= CMSPAR;
+        newtio0.c_cflag &= ~PARODD;
+    }
+
+    tcsetattr(_channelId, TCSADRAIN, &newtio0);
+
+    return rc;
+}
+

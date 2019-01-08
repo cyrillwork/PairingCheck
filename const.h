@@ -12,4 +12,6 @@
 #define BYTESIZE 8
 #define STOPBITS 1
 
+#define is9thbit false
+
 #endif // CONST_H
