@@ -1,3 +1,5 @@
+//This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
 #ifndef ABSTRACT_INTERFACE_H
 #define ABSTRACT_INTERFACE_H
 

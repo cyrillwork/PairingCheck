@@ -1,3 +1,5 @@
+//This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
 #include <iostream>
 #include <getopt.h>
 
@@ -11,14 +13,13 @@ enum
     NONE = 0,   // режим не установлен
     CLIENT,     // клиент
     SERVER      // сервер
-} Prog_Mode;
+};
 
 void printErrorMessage()
 {
     cout << "Error. Usage: " << endl;
     cout << "Server mode: PairingRS -s port" << endl;
-    cout << "Client mode: PairingRS -c filename" << endl;
-    cout << "Default client port /dev/ttyS0" << endl;
+    cout << "Client mode: PairingRS -c port filename" << endl;
 }
 
 int main(int argc, char *argv[])
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
 
     //cout << "Hello, server " << Server::getFileName() << endl;
 
-    if(argc != 3)
+    if(argc < 3)
     {
         printErrorMessage();
     }
@@ -59,6 +60,11 @@ int main(int argc, char *argv[])
             case 'c':
                 Mode = CLIENT;
                 //printf("set option link as file\n");
+                if(argc != 4)
+                {
+                    printErrorMessage();
+                    return 0;
+                }
                 break;
             }
         }
@@ -70,7 +76,7 @@ int main(int argc, char *argv[])
                 try
                 {
                     cout << "create client" << endl;
-                    Client client(argv[optind]);
+                    Client client(argv[optind], argv[optind + 1]);
                     getchar();
                 }
                 catch (WorkerRS::WorkerRSEx ex)
