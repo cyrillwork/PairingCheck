@@ -5,13 +5,16 @@
 
 #include <vector>
 #include "workerrs.h"
+#include "paramsrs.h"
 
 using namespace std;
 
 class Server: public WorkerRS
 {
 public:
-    Server(string devPath);
+    //Server(string devPath);
+
+    Server(ParamsRS _params);
 
     static string getFileName();
 
@@ -19,6 +22,8 @@ protected:
     void run_func();
 
 private:
+    //ParamsRS params;
+
     bool isGetData;
     vector <char> ArrayData;
 };

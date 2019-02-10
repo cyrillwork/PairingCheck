@@ -7,6 +7,7 @@
 #include <string>
 
 #include "rs_interface.h"
+#include "paramsrs.h"
 
 
 //! Класс соединения с абонентом по абстрактному интерфейсу
@@ -26,7 +27,7 @@ public:
     /*!
      * \param devPath - название RS порта
      */
-    void createRSInterface(const string devPath);
+    void createRSInterface(ParamsRS _params);
 
     //! Деструктор - закрывает соединение
     ~Interface();

@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     rs_interface.cpp \
     client.cpp \
     server.cpp \
-    workerrs.cpp
+    workerrs.cpp \
+    paramsrs.cpp
 
 HEADERS += \
     abstract-interface.h \
@@ -25,4 +26,5 @@ HEADERS += \
     client.h \
     server.h \
     const.h \
-    workerrs.h
+    workerrs.h \
+    paramsrs.h

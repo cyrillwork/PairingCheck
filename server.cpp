@@ -4,8 +4,14 @@
 #include <fstream>
 
 #include "server.h"
-
+/*
 Server::Server(string devPath): WorkerRS(devPath)
+{
+    isGetData = false;
+}
+*/
+
+Server::Server(ParamsRS _params): WorkerRS(_params)
 {
     isGetData = false;
 }

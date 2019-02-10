@@ -3,9 +3,9 @@
 #include "interface.h"
 
 
-void Interface::createRSInterface(const string devPath)
+void Interface::createRSInterface(ParamsRS _params)
 {
-    m_interfaceImpl = new RSInterface(devPath);
+    m_interfaceImpl = new RSInterface(_params);
     open();
 }
 

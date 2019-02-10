@@ -2,7 +2,7 @@
 
 #include "rs_interface.h"
 
-
+/*
 RSInterface::RSInterface(string devPath): _channelId(-1)
 {
     this->devPath = devPath;
@@ -24,6 +24,14 @@ RSInterface::RSInterface(string devPath): _channelId(-1)
     _byteSize[7] = CS7;
     _byteSize[8] = CS8;
 }
+*/
+
+RSInterface::RSInterface(ParamsRS _params):
+    params(_params),
+    _channelId(-1)
+{
+    cout << "constructor RSInterface devPath=" << params.getDevPath() << endl;
+}
 
 RSInterface::~RSInterface()
 {
@@ -31,13 +39,14 @@ RSInterface::~RSInterface()
 
 bool RSInterface::open()
 {
-    cout << "RSInterface::open() " << devPath << endl;
-    _channelId = ::open(devPath.c_str(), O_RDWR | O_NONBLOCK /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
+    cout << "RSInterface::open() " << params.getDevPath() << endl;
+
+    _channelId = ::open(params.getDevPath().c_str(), O_RDWR | O_NONBLOCK /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
 
     if (_channelId < 0)
     {
-        cout << "Can't open device" << devPath << endl;
-        perror(devPath.c_str());
+        cout << "Can't open device" << params.getDevPath() << endl;
+        perror(params.getDevPath().c_str());
         return false;
     }
 
@@ -45,7 +54,7 @@ bool RSInterface::open()
     memset (&newtio0, 0, sizeof (newtio0));
 
 
-    if(is9thbit)
+    if(params.get9thBit())
     {
         // 9th bit
         newtio0.c_iflag = IGNBRK;
@@ -69,8 +78,8 @@ bool RSInterface::open()
         newtio0.c_cc[VMIN] = 0;
         newtio0.c_cc[VTIME]= 0;
 
-        cfsetospeed(&newtio0, _baudRate[BAUDRATE] );
-        cfsetispeed(&newtio0, _baudRate[BAUDRATE] );
+        cfsetospeed(&newtio0, params.getBaudRate() );
+        cfsetispeed(&newtio0, params.getBaudRate() );
 
         tcflush (_channelId, TCIFLUSH);
         tcsetattr (_channelId, TCSANOW, &newtio0);
@@ -84,7 +93,7 @@ bool RSInterface::open()
     }
     else
     {
-        newtio0.c_cflag = _baudRate[BAUDRATE] | _byteSize[BYTESIZE] | CLOCAL | CREAD | _parity[PARITY];
+        newtio0.c_cflag = params.getBaudRate() | params.getByteSize() | CLOCAL | CREAD | (int)params.getParity();
 
         newtio0.c_cflag &= ~CRTSCTS;
         newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
@@ -130,7 +139,7 @@ int RSInterface::read(char *data, int size, int timeout)
 
 int RSInterface::write(const char *data, int size)
 {
-    if(is9thbit)
+    if(params.get9thBit())
     {
         for(int iii = 0; iii<size; iii++)
         {
@@ -180,12 +189,12 @@ int RSInterface::putCharWakeup(unsigned char symbol)
 
     rc = ::write(_channelId, &symbol, 1);
 
-    if(!is9thbit)
+    if(!params.get9thBit())
         newtio0.c_cflag = newtio0.c_cflag & (~PARENB) & (~PARODD);
 
     tcdrain(_channelId);
 
-    if(is9thbit)
+    //if(params.get9thBit())
     {
         usleep(10000);
         // Set receive with space parity

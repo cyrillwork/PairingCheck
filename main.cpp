@@ -5,6 +5,7 @@
 
 #include "client.h"
 #include "server.h"
+#include "paramsrs.h"
 
 using namespace std;
 
@@ -18,13 +19,16 @@ enum
 void printErrorMessage()
 {
     cout << "Error. Usage: " << endl;
-    cout << "Server mode: PairingRS -s port" << endl;
-    cout << "Client mode: PairingRS -c port filename" << endl;
+    cout << "Server mode: PairingRS -server -devpath port" << endl;
+    cout << "Client mode: PairingRS -client filename -devpath port" << endl;
 }
 
 int main(int argc, char *argv[])
 {
+    char fileName[128];
     int Mode = NONE;
+
+    ParamsRS params;
 
     //cout << "Hello, server " << Server::getFileName() << endl;
 
@@ -34,24 +38,34 @@ int main(int argc, char *argv[])
     }
     else
     {
+        static struct option long_options[] =
+        {
+        {"client",      required_argument,      0,  'c'},
+        {"server",      no_argument,            0,  's'},
+        {"devpath",     required_argument,      0,  'd'},
+
+    };
+
+        const char *optString = "c:d:c?";
+
         while(true)
         {
             int c;
-            static struct option long_options[] =
-            {
-                {"c", 0, 0, 0},
-                {"s", 0, 0, 0},
-            };
 
             int option_index = 0;
-            c = getopt_long(argc, argv, "c s", long_options, &option_index);
+
+            c = getopt_long(argc, argv, optString, long_options, &option_index);
 
             if(c == -1)
             {
                 break;
             }
+
+            std::cout << "getopt c=" << (char)c << std::endl;
+
             switch(c)
             {
+
             case 's':
                 Mode = SERVER;
                 //printf("set option show time\n");
@@ -60,51 +74,67 @@ int main(int argc, char *argv[])
             case 'c':
                 Mode = CLIENT;
                 //printf("set option link as file\n");
-                if(argc != 4)
-                {
-                    printErrorMessage();
-                    return 0;
-                }
+                strcpy(fileName, optarg);
                 break;
+
+            case 'd':
+                params.setDevPath(optarg);
+                break;
+
+            case '?':
+            {
+                printErrorMessage();
+                return 0;
+            }
+
             }
         }
 
+
+
         switch(Mode)
         {
-            case CLIENT:
+        case CLIENT:
+        {
+            try
             {
-                try
-                {
-                    cout << "create client" << endl;
-                    Client client(argv[optind], argv[optind + 1]);
-                    getchar();
-                }
-                catch (WorkerRS::WorkerRSEx ex)
-                {
-                    cout << "Exception client: " << ex.message << endl;
-                    return 0;
-                }
+                cout << "create client fileName=" << fileName << endl;
+                cout << "params.getDevPath() = " << params.getDevPath() << endl;
+
+                Client client(params, fileName);
+
+                getchar();
             }
+            catch (WorkerRS::WorkerRSEx ex)
+            {
+                cout << "Exception client: " << ex.message << endl;
+                return 0;
+            }
+        }
             break;
-            case SERVER:
+        case SERVER:
+        {
+            try
             {
-                try
-                {
-                    cout << "create server" << endl;
-                    Server server(argv[optind]);
-                    getchar();
-                }
-                catch (WorkerRS::WorkerRSEx ex)
-                {
-                    cout << "Exception server: " << ex.message << endl;
-                    return 0;
-                }
+                cout << "create server" << endl;
+                cout << "params.getDevPath() = " << params.getDevPath() << endl;
+                Server server(params);
+
+                //Server server(argv[optind]);
+
+                getchar();
             }
+            catch (WorkerRS::WorkerRSEx ex)
+            {
+                cout << "Exception server: " << ex.message << endl;
+                return 0;
+            }
+        }
             break;
-            default:
-            {
-                printErrorMessage();
-            }
+        default:
+        {
+            printErrorMessage();
+        }
         }
 
 

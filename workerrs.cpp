@@ -9,6 +9,18 @@ WorkerRS::WorkerRS(string devPath): isRun(true), run_thread{&WorkerRS::run, this
     interface();
 }
 
+WorkerRS::WorkerRS(ParamsRS _params):
+    isRun(true),
+    params(_params),
+    run_thread{&WorkerRS::run, this}
+{
+    this->devPath = params.getDevPath();
+
+    std::cout << "WorkerRS devPath=" << this->devPath << std::endl;
+
+    interface();
+}
+
 WorkerRS::~WorkerRS()
 {
     isRun = false;
@@ -37,7 +49,7 @@ Interface *WorkerRS::interface()
     if(instance == 0)
     {
         instance = new Interface();
-        instance->createRSInterface(this->devPath);
+        instance->createRSInterface(this->params);
 
         if(!instance->isOpened())
         {

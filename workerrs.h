@@ -9,12 +9,15 @@
 
 #include "interface.h"
 #include "const.h"
+#include "paramsrs.h"
 
 class WorkerRS
 {
 
 public:
     WorkerRS(string devPath);
+    WorkerRS(ParamsRS _params);
+
     ~WorkerRS();
 
     void stopThread() { isRun = false; }
@@ -36,6 +39,7 @@ private:
 
     std::thread run_thread;
     std::string devPath;
+    ParamsRS params;
 };
 
 #endif // WORKERRS_H

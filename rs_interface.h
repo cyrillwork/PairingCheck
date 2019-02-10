@@ -16,6 +16,7 @@
 
 #include "const.h"
 #include "abstract-interface.h"
+#include "paramsrs.h"
 
 using namespace std;
 
@@ -24,7 +25,9 @@ class RSInterface : public AbstractInterface
 
 public:
     RSInterface() {};
-    RSInterface(string devPath);
+    //RSInterface(string devPath);
+    RSInterface(ParamsRS _params);
+
     ~RSInterface();
 
     const char* name() { return "RS"; }
@@ -36,14 +39,15 @@ public:
     int putCharWakeup(unsigned char symbol);
 
 private:
-    map <int, int> _baudRate;
-    map <string, int> _parity;
-    map <int, int> _byteSize;
+    //map <int, int> _baudRate;
+    //map <string, int> _parity;
+    //map <int, int> _byteSize;
+    //string devPath;
 
-    int _channelId;
-    string devPath;
+    ParamsRS params;
+
+    int _channelId;   
     struct termios newtio0;
-
 };
 
 #endif // RS_INTERFACE_H

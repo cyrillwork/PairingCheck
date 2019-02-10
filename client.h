@@ -8,12 +8,15 @@
 #include <vector>
 
 #include "workerrs.h"
+#include "paramsrs.h"
 
 class Client: public WorkerRS
 {
 
 public:
-    Client(string devPath, string fileName);
+    //Client(string devPath, string fileName);
+    Client(ParamsRS _params, string fileName);
+
     ~Client();
 
 protected:
@@ -22,8 +25,11 @@ protected:
 private:
     void openFile();
 
+    //ParamsRS params;
+
     ifstream fileStream;
     string fileName;
+
 };
 
 #endif // CLIENT_H
