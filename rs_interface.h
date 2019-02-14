@@ -46,6 +46,8 @@ private:
 
     ParamsRS params;
 
+    bool isFirstByte = false;
+
     int _channelId;   
     struct termios newtio0;
 };

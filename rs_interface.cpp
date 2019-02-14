@@ -1,30 +1,8 @@
 //This is an open source non-commercial project. Dear PVS-Studio, please check it.
 
 #include "rs_interface.h"
+#include <thread>
 
-/*
-RSInterface::RSInterface(string devPath): _channelId(-1)
-{
-    this->devPath = devPath;
-
-    int array1[] = {50, 75,  110,   134,  150,  200,  300,  600,  1200,  1800,  2400,  4800,  9600,  19200,  38400,  57600,  115200, 230400};
-    int array2[] = {B50, B75, B110, B134, B150, B200, B300, B600, B1200, B1800, B2400, B4800, B9600, B19200, B38400, B57600, B115200, B230400};
-
-    for(unsigned int iii=0; iii < (sizeof(array1)/sizeof(int)); iii++)
-    {
-        _baudRate[array1[iii]] = array2[iii];
-    }
-
-    _parity[string("None")] = 0;
-    _parity[string("Odd")] = PARENB | PARODD;
-    _parity[string("Even")] = PARENB;
-
-    _byteSize[5] = CS5;
-    _byteSize[6] = CS6;
-    _byteSize[7] = CS7;
-    _byteSize[8] = CS8;
-}
-*/
 
 RSInterface::RSInterface(ParamsRS _params):
     params(_params),
@@ -40,6 +18,9 @@ RSInterface::~RSInterface()
 bool RSInterface::open()
 {
     cout << "RSInterface::open() " << params.getDevPath() << endl;
+    cout << "params.get9thBit() " << params.get9thBit() << endl;
+
+    isFirstByte = true;
 
     _channelId = ::open(params.getDevPath().c_str(), O_RDWR | O_NONBLOCK /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
 
@@ -49,7 +30,6 @@ bool RSInterface::open()
         perror(params.getDevPath().c_str());
         return false;
     }
-
 
     memset (&newtio0, 0, sizeof (newtio0));
 
@@ -62,13 +42,15 @@ bool RSInterface::open()
         newtio0.c_iflag &= ~IGNPAR;
         newtio0.c_iflag &= ~ISTRIP;
         newtio0.c_iflag |= INPCK;
+
         newtio0.c_iflag |= PARMRK; // Mark all bytes received with 9th bit set by "ff 0"
         newtio0.c_cflag |= CMSPAR;
+
         newtio0.c_cflag &= ~PARODD;	// normal state - space parity
 
         newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);
         newtio0.c_cflag = CREAD | CLOCAL;
-        newtio0.c_cflag |= PARENB;
+        newtio0.c_cflag |= PARENB;// | PARODD;
         newtio0.c_cflag &= ~CSTOPB;
         newtio0.c_cflag &= ~CSIZE;
         newtio0.c_cflag |= CS8;
@@ -83,6 +65,7 @@ bool RSInterface::open()
 
         tcflush (_channelId, TCIFLUSH);
         tcsetattr (_channelId, TCSANOW, &newtio0);
+
 
         // Set receive with space parity
         newtio0.c_cflag |= PARENB;
@@ -139,21 +122,32 @@ int RSInterface::read(char *data, int size, int timeout)
 
 int RSInterface::write(const char *data, int size)
 {
-    if(params.get9thBit())
+    int res = 0;
+    int offset = 0;
+
+    if(!data)
     {
-        for(int iii = 0; iii<size; iii++)
+        return -1;
+    }
+
+    if(params.get9thBit() && isFirstByte)
+    {
+        isFirstByte = false;
+
+        if((res = putCharWakeup(data[0])) == -1)
         {
-            if(putCharWakeup(data[iii]) == -1)
-            {
-                return -1;
-            }
+            return -1;
         }
-        return size;
+
+        offset = 1;
+        size--;
+
     }
-    else
-    {
-        return ::write(_channelId, data, size);
-    }
+
+   res += ::write(_channelId, data + offset, size);
+
+   return res;
+
 }
 
 /******************************************************************************
@@ -173,37 +167,49 @@ int RSInterface::putCharWakeup(unsigned char symbol)
     tmp  = symbol;
     nine = 0;
 
+    std::cout << "SRL_PutCharWakeup symbol = " << (int)symbol << std::endl;
+
     for(i=0;i<8;i++)
     {
         nine ^= (tmp & 0x01);
         tmp = tmp >> 1;
     }
-    if (nine)
+
+    if (nine)//(false)//(nine)
+    {
+        std::cout << "set 9 bit" << std::endl;
         newtio0.c_cflag = (newtio0.c_cflag | PARENB) & (~PARODD);
+    }
     else
+    {
+        std::cout << "not set 9 bit" << std::endl;
         newtio0.c_cflag =  newtio0.c_cflag | PARENB | PARODD;
+    }
 
     tcdrain(_channelId);
+
     if (tcsetattr(_channelId, TCSADRAIN , &newtio0) == -1)
         return -1;
 
     rc = ::write(_channelId, &symbol, 1);
 
-    if(!params.get9thBit())
-        newtio0.c_cflag = newtio0.c_cflag & (~PARENB) & (~PARODD);
 
-    tcdrain(_channelId);
+    //if(!params.get9thBit())
+    //    newtio0.c_cflag = newtio0.c_cflag & (~PARENB) & (~PARODD);
 
-    //if(params.get9thBit())
+    //tcdrain(_channelId);
+
     {
-        usleep(10000);
+        //std::this_thread::sleep_for(chrono::milliseconds(100));
         // Set receive with space parity
         newtio0.c_cflag |= PARENB;
         newtio0.c_cflag |= CMSPAR;
         newtio0.c_cflag &= ~PARODD;
     }
 
-    tcsetattr(_channelId, TCSADRAIN, &newtio0);
+    //tcsetattr(_channelId, TCSADRAIN, &newtio0);
+    tcsetattr (_channelId, TCSANOW, &newtio0);
+
 
     return rc;
 }

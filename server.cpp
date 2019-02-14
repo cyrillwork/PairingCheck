@@ -21,9 +21,11 @@ string Server::getFileName()
     char buff[128];
     time_t t = time(0);   // get time now
 
+    countFiles++;
+
     strftime(buff, 128, "%F_%X.hex", localtime( &t ));
 
-    return string(buff);
+    return string(buff) + "_" + std::to_string(countFiles);
 }
 
 void Server::run_func()

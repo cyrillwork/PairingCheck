@@ -4,7 +4,7 @@
 #define CONST_H
 
 #define BUFF_SIZE 32
-#define DELAY_MSEC 50
+#define DELAY_MSEC 300
 
 //#define PARITY "None"
 //#define BAUDRATE 19200

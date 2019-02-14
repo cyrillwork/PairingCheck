@@ -14,7 +14,8 @@ ParamsRS::ParamsRS(ParamsRS &params):
     devPath(params.getDevPath()),
     parity(params.getParity()),
     speed(params.getBaudRate()),
-    byteSize(params.getByteSize())
+    byteSize(params.getByteSize()),
+    Is9thbit(params.Is9thbit)
 {
 
 }

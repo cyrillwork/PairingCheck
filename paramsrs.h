@@ -45,7 +45,7 @@ public:
     void setParity(Parity parity) { this->parity = parity; }
 
     int getBaudRate() { return speed; }
-    void setBaudRaet( string _speed ) { this->speed = this->baudeRate[_speed]; }
+    void setBaudRate( string _speed ) { this->speed = this->baudeRate[_speed]; }
 
     ByteSize getByteSize() { return byteSize; }
     void setByteSize(ByteSize byteSize) { this->byteSize = byteSize; }

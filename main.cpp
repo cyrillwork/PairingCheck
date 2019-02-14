@@ -19,8 +19,9 @@ enum
 void printErrorMessage()
 {
     cout << "Error. Usage: " << endl;
-    cout << "Server mode: PairingRS -server -devpath port" << endl;
-    cout << "Client mode: PairingRS -client filename -devpath port" << endl;
+    cout << "Server mode: PairingRS --server --devpath port [--wakeupbit] [--speed buadrate]" << endl;
+    cout << "Client mode: PairingRS --client filename --devpath port [--wakeupbit] [--speed buadrate]" << endl;
+    cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;
 }
 
 int main(int argc, char *argv[])
@@ -43,10 +44,12 @@ int main(int argc, char *argv[])
         {"client",      required_argument,      0,  'c'},
         {"server",      no_argument,            0,  's'},
         {"devpath",     required_argument,      0,  'd'},
+        {"speed",       required_argument,      0,  'b'},
+        {"wakeupbit",   no_argument,            0,  'w'},
 
     };
 
-        const char *optString = "c:d:c?";
+        const char *optString = "c:d:b:sw?";
 
         while(true)
         {
@@ -60,8 +63,6 @@ int main(int argc, char *argv[])
             {
                 break;
             }
-
-            std::cout << "getopt c=" << (char)c << std::endl;
 
             switch(c)
             {
@@ -80,6 +81,20 @@ int main(int argc, char *argv[])
             case 'd':
                 params.setDevPath(optarg);
                 break;
+
+            case 'b':
+            {
+                std::cout << "set baudrate" << optarg << std::endl;
+                params.setBaudRate(optarg);
+            }
+            break;
+
+            case 'w':
+            {
+                std::cout << "set 9th bit (wakeup bit)" << std::endl;
+                params.set9thBit(true);
+            }
+            break;
 
             case '?':
             {

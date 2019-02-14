@@ -9,6 +9,9 @@
 
 using namespace std;
 
+static int countFiles = 0;
+
+
 class Server: public WorkerRS
 {
 public:
@@ -26,6 +29,9 @@ private:
 
     bool isGetData;
     vector <char> ArrayData;
+
 };
+
+
 
 #endif // SERVER_H
