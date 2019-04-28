@@ -22,28 +22,22 @@ using namespace std;
 
 class RSInterface : public AbstractInterface
 {
-
 public:
-    RSInterface() {};
-    //RSInterface(string devPath);
+
     RSInterface(ParamsRS _params);
 
-    ~RSInterface();
+    ~RSInterface() override;
 
-    const char* name() { return "RS"; }
+     const std::string name() override
+        { return std::string("RS"); }
 
-    bool open();
-    bool close();
-    int read(char *data, int size, int timeout);
-    int write(const char *data, int size);
+    bool open() override;
+    bool close() override;
+    int read(char *data, int size, int timeout) override;
+    int write(const char *data, int size) override;
     int putCharWakeup(unsigned char symbol);
 
 private:
-    //map <int, int> _baudRate;
-    //map <string, int> _parity;
-    //map <int, int> _byteSize;
-    //string devPath;
-
     ParamsRS params;
 
     bool isFirstByte = false;

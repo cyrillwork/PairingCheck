@@ -42,7 +42,7 @@ Interface *WorkerRS::interface()
     if(instance == 0)
     {
         instance = new Interface();
-        instance->createRSInterface(this->params);
+        instance->createRSInterface(params);
 
         if(!instance->isOpened())
         {
@@ -51,7 +51,6 @@ Interface *WorkerRS::interface()
 
             throw WorkerRSEx(string("Error open dev ") + params.getDevPath());
         }
-
     }
 
     return instance;

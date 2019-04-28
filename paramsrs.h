@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <iostream>
 
 using namespace std;
@@ -61,7 +61,7 @@ private:
 
     bool Is9thbit = false;
 
-    map <string, int> baudeRate =
+    std::unordered_map <string, int> baudeRate =
     {
         { "50",  B50 },
         { "75",  B75 },
