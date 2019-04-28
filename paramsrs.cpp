@@ -4,10 +4,10 @@
 ParamsRS::ParamsRS()
 {
     //set default state
-    this->devPath = "/dev/ttyS0";
-    this->parity = Parity::None;
-    this->speed = this->baudeRate["9600"];
-    this->byteSize = ByteSize::_CS8;
+    devPath = "/dev/ttyS0";
+    parity  = Parity::None;
+    speed   = baudeRate["9600"];
+    byteSize = ByteSize::_CS8;
 }
 
 ParamsRS::ParamsRS(ParamsRS &params):
@@ -22,8 +22,23 @@ ParamsRS::ParamsRS(ParamsRS &params):
 
 ParamsRS::ParamsRS(string dev, Parity parity, int speed, ByteSize byteSize)
 {
-    this->devPath = dev;
-    this->parity = parity;
-    this->speed = speed;
-    this->byteSize = byteSize;
+    devPath     = dev;
+    parity      = parity;
+    speed       = speed;
+    byteSize    = byteSize;
+}
+
+void ParamsRS::setBaudRate(string _speed)
+{
+    auto it = baudeRate.find(_speed);
+
+    if(it != baudeRate.end())
+    {
+        speed = baudeRate[_speed];
+    }
+    else
+    {
+        std::cout << "Error find baude rate " << _speed << " set default 9600" << std::endl;
+        speed   = baudeRate["9600"];
+    }
 }
