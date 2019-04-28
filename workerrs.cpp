@@ -3,21 +3,14 @@
 #include "workerrs.h"
 
 
-WorkerRS::WorkerRS(string devPath): isRun(true), run_thread{&WorkerRS::run, this}
-{
-    this->devPath = devPath;
-    interface();
-}
 
-WorkerRS::WorkerRS(ParamsRS _params):
+WorkerRS::WorkerRS(ParamsRS& _params):
     isRun(true),
     params(_params),
     run_thread{&WorkerRS::run, this}
 {
-    this->devPath = params.getDevPath();
-
-    std::cout << "WorkerRS devPath=" << this->devPath << std::endl;
-
+    //this->devPath = params.getDevPath();
+    std::cout << "WorkerRS devPath=" << params.getDevPath() << std::endl;
     interface();
 }
 
@@ -56,7 +49,7 @@ Interface *WorkerRS::interface()
             isRun = false;
             this->run_thread.join();
 
-            throw WorkerRSEx(string("Error open dev ") + devPath);
+            throw WorkerRSEx(string("Error open dev ") + params.getDevPath());
         }
 
     }

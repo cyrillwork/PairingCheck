@@ -13,11 +13,8 @@
 
 class WorkerRS
 {
-
 public:
-    WorkerRS(string devPath);
-    WorkerRS(ParamsRS _params);
-
+    WorkerRS(ParamsRS& _params);
     ~WorkerRS();
 
     void stopThread() { isRun = false; }
@@ -31,15 +28,17 @@ public:
 
 protected:
     void virtual run_func();
+
     Interface *interface();
+
     bool isRun;
 
 private:
     void run();
 
+    ParamsRS& params;
     std::thread run_thread;
-    std::string devPath;
-    ParamsRS params;
+    //std::string devPath;
 };
 
 #endif // WORKERRS_H

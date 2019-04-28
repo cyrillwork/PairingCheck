@@ -9,7 +9,7 @@
 
 using namespace std;
 
-static int countFiles = 0;
+
 
 
 class Server: public WorkerRS
@@ -30,6 +30,7 @@ private:
     bool isGetData;
     vector <char> ArrayData;
 
+    static int countFiles;
 };
 
 

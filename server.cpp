@@ -4,12 +4,8 @@
 #include <fstream>
 
 #include "server.h"
-/*
-Server::Server(string devPath): WorkerRS(devPath)
-{
-    isGetData = false;
-}
-*/
+
+int Server::countFiles = 0;
 
 Server::Server(ParamsRS _params): WorkerRS(_params)
 {
