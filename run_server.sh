@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./PairingRS --server --devpath /dev/ttyS0
+./PairingCheck --server --devpath /dev/ttyS0

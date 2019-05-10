@@ -1,4 +1,4 @@
 #!/bin/bash
 
-./PairingRS --client ./test.txt --devpath /dev/ttyS1
+./PairingCheck --client ./test.txt --devpath /dev/ttyS1
 
