@@ -2,7 +2,17 @@
 #ifndef ABSTRACT_INTERFACE_H
 #define ABSTRACT_INTERFACE_H
 
+#include <memory>
 #include <string>
+
+#if __cplusplus==201103L
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+#endif
+
 
 //! Интерфейсный класс унифицированной библиотеки канальных частей
 class AbstractInterface

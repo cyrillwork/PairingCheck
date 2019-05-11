@@ -1,17 +1,16 @@
 #include "paramsrs.h"
 
 
-ParamsRS::ParamsRS()
+ParamsRS::ParamsRS(): IParams("/dev/ttyS0")
 {
     //set default state
-    devPath = "/dev/ttyS0";
     parity  = Parity::None;
     speed   = baudeRate["9600"];
     byteSize = ByteSize::_CS8;
 }
 
 ParamsRS::ParamsRS(ParamsRS &params):
-    devPath(params.getDevPath()),
+    IParams(params.getDevPath()),
     parity(params.getParity()),
     speed(params.getBaudRate()),
     byteSize(params.getByteSize()),
@@ -20,9 +19,9 @@ ParamsRS::ParamsRS(ParamsRS &params):
 
 }
 
-ParamsRS::ParamsRS(string dev, Parity parity, int speed, ByteSize byteSize)
+ParamsRS::ParamsRS(string dev, Parity parity, int speed, ByteSize byteSize):
+    IParams(dev)
 {
-    devPath     = dev;
     parity      = parity;
     speed       = speed;
     byteSize    = byteSize;

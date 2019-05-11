@@ -4,7 +4,6 @@
 #define RS_INTERFACE_H
 
 #include <iostream>
-#include <string>
 #include <map>
 #include <sys/types.h>
 #include <sys/stat.h>

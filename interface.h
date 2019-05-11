@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <string>
 
-#include "rs_interface.h"
+#include "rsinterface.h"
 #include "paramsrs.h"
 
 

@@ -1,13 +1,14 @@
 #ifndef PARAMSRS_H
 #define PARAMSRS_H
 
+#include "iparams.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
 
-#include <string>
 #include <unordered_map>
 #include <iostream>
 
@@ -29,7 +30,7 @@ enum ByteSize
     _CS8 = CS8
 };
 
-class ParamsRS
+class ParamsRS: public IParams
 {
 public:
     ParamsRS();
@@ -38,8 +39,7 @@ public:
 
     ParamsRS(string devPath, Parity parity, int speed, ByteSize byteSize);
 
-    string getDevPath() { return devPath; }
-    void setDevPath(string devPath) { this->devPath = devPath; }
+    const string getName() noexcept override { return string("Params RS-231"); }
 
     Parity getParity() { return parity; }
     void setParity(Parity parity) { this->parity = parity; }
@@ -54,7 +54,6 @@ public:
     bool get9thBit() { return this->Is9thbit; }
 
 private:
-    string devPath;
     Parity parity; // "None"
     int speed;
     ByteSize byteSize;

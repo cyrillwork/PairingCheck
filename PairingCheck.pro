@@ -13,18 +13,21 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     interface.cpp \
-    rs_interface.cpp \
     client.cpp \
     server.cpp \
     workerrs.cpp \
-    paramsrs.cpp
+    paramsrs.cpp \
+    udpparams.cpp \
+    rsinterface.cpp
 
 HEADERS += \
     abstract-interface.h \
     interface.h \
-    rs_interface.h \
     client.h \
     server.h \
     const.h \
     workerrs.h \
-    paramsrs.h
+    paramsrs.h \
+    iparams.h \
+    udpparams.h \
+    rsinterface.h

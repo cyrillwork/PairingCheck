@@ -1,14 +1,7 @@
 //This is an open source non-commercial project. Dear PVS-Studio, please check it.
 
 #include "client.h"
-/*
-Client::Client(string devPath, string fileName): WorkerRS(devPath)
-{
-    this->fileName = fileName;
 
-    openFile();
-}
-*/
 
 Client::Client(ParamsRS _params, string fileName):
     WorkerRS(_params)
