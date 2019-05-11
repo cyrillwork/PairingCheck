@@ -3,8 +3,8 @@
 #include "client.h"
 
 
-Client::Client(ParamsRS _params, string fileName):
-    WorkerRS(_params)
+Client::Client(TypeParams _params, string fileName):
+    WorkerRS(std::move(_params))
 
 {
     this->fileName = fileName;
@@ -27,7 +27,7 @@ void Client::run_func()
 
     if(res > 0)
     {
-        int res_send = interface()->write(buff, res);
+        int res_send = getInterface()->write(buff, res);
         count_send += res_send;
         cout << "Send " << count_send << " bytes" << endl;
     }
@@ -47,18 +47,5 @@ void Client::openFile()
         isRun = false;
         throw WorkerRSEx("File do not opened " + fileName);
     }
-/*
-    while (!fileStream.eof())
-    {
-        char buff[BUFF_SIZE];
-        fileStream.read(buff, BUFF_SIZE);
-        int res = fileStream.gcount();
-        for(int iii = 0; iii<res; iii++)
-        {
-            arrayData.push_back(buff[iii]);
-        }
-    }
-    cout << "Read file size = " << arrayData.size() << endl;
-*/
 }
 

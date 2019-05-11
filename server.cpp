@@ -7,7 +7,7 @@
 
 int Server::countFiles = 0;
 
-Server::Server(ParamsRS _params): WorkerRS(_params)
+Server::Server(TypeParams _params): WorkerRS(std::move(_params))
 {
     isGetData = false;
 }
@@ -28,7 +28,7 @@ void Server::run_func()
 {
     char buff[BUFF_SIZE];
 
-    int res = interface()->read(buff, BUFF_SIZE, DELAY_MSEC*1000);
+    int res = getInterface()->read(buff, BUFF_SIZE, DELAY_MSEC*1000);
 
     if(res > 0)
     {

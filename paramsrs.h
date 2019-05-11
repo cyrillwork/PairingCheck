@@ -3,32 +3,15 @@
 
 #include "iparams.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <unistd.h>
-
+#include <memory>
 #include <unordered_map>
 #include <iostream>
 
 using namespace std;
 
 
-enum class Parity
-{
-    None = 0,
-    Odd  = (PARENB | PARODD),
-    Even = PARENB
-};
-
-enum ByteSize
-{
-    _CS5 = CS5,
-    _CS6 = CS6,
-    _CS7 = CS7,
-    _CS8 = CS8
-};
+class ParamsRS;
+using TypeParamsRS = std::unique_ptr<ParamsRS>;
 
 class ParamsRS: public IParams
 {
@@ -41,17 +24,17 @@ public:
 
     const string getName() noexcept override { return string("Params RS-231"); }
 
-    Parity getParity() { return parity; }
-    void setParity(Parity parity) { this->parity = parity; }
+    Parity getParity() override { return parity; }
+    void setParity(Parity parity) override { this->parity = parity; }
 
-    int getBaudRate() { return speed; }
-    void setBaudRate( string _speed );
+    int getBaudRate() override { return speed; }
+    void setBaudRate ( string _speed ) override;
 
-    ByteSize getByteSize() { return byteSize; }
-    void setByteSize(ByteSize byteSize) { this->byteSize = byteSize; }
+    ByteSize getByteSize() override { return byteSize; }
+    void setByteSize(ByteSize byteSize) override { this->byteSize = byteSize; }
 
-    void set9thBit(bool _is9thbit) { this->Is9thbit = _is9thbit; }
-    bool get9thBit() { return this->Is9thbit; }
+    void set9thBit(bool _is9thbit) override { this->Is9thbit = _is9thbit; }
+    bool get9thBit() override { return this->Is9thbit; }
 
 private:
     Parity parity; // "None"

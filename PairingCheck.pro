@@ -12,7 +12,7 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    interface.cpp \
+#    interface.cpp \
     client.cpp \
     server.cpp \
     workerrs.cpp \
@@ -21,8 +21,7 @@ SOURCES += main.cpp \
     rsinterface.cpp
 
 HEADERS += \
-    abstract-interface.h \
-    interface.h \
+#    interface.h \
     client.h \
     server.h \
     const.h \
@@ -30,4 +29,6 @@ HEADERS += \
     paramsrs.h \
     iparams.h \
     udpparams.h \
-    rsinterface.h
+    rsinterface.h \
+    iworker.h \
+    iinterface.h

@@ -9,24 +9,18 @@
 
 using namespace std;
 
-
-
-
 class Server: public WorkerRS
 {
 public:
-    //Server(string devPath);
 
-    Server(ParamsRS _params);
+    Server(TypeParams _params);
 
     static string getFileName();
 
 protected:
-    void run_func();
+    void run_func() override;
 
 private:
-    //ParamsRS params;
-
     bool isGetData;
     vector <char> ArrayData;
 

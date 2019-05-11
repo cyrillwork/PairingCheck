@@ -26,10 +26,10 @@ void printErrorMessage()
 
 int main(int argc, char *argv[])
 {
-    char fileName[128];
+    std::string fileName;
     int Mode = NONE;
 
-    ParamsRS params;
+    TypeParams params = make_unique<ParamsRS>();
 
     //cout << "Hello, server " << Server::getFileName() << endl;
 
@@ -75,24 +75,24 @@ int main(int argc, char *argv[])
             case 'c':
                 Mode = CLIENT;
                 //printf("set option link as file\n");
-                strcpy(fileName, optarg);
+                fileName = optarg;
                 break;
 
             case 'd':
-                params.setDevPath(optarg);
+                params->setDevPath(optarg);
                 break;
 
             case 'b':
             {
                 std::cout << "set baudrate" << optarg << std::endl;
-                params.setBaudRate(optarg);
+                params->setBaudRate(optarg);
             }
             break;
 
             case 'w':
             {
                 std::cout << "set 9th bit (wakeup bit)" << std::endl;
-                params.set9thBit(true);
+                params->set9thBit(true);
             }
             break;
 
@@ -114,9 +114,9 @@ int main(int argc, char *argv[])
             try
             {
                 cout << "create client fileName=" << fileName << endl;
-                cout << "params.getDevPath() = " << params.getDevPath() << endl;
+                cout << "params->getDevPath() = " << params->getDevPath() << endl;
 
-                Client client(params, fileName);
+                Client client(std::move(params), fileName);
 
                 getchar();
             }
@@ -132,8 +132,8 @@ int main(int argc, char *argv[])
             try
             {
                 cout << "create server" << endl;
-                cout << "params.getDevPath() = " << params.getDevPath() << endl;
-                Server server(params);
+                cout << "params->getDevPath() = " << params->getDevPath() << endl;
+                Server server(std::move(params));
 
                 //Server server(argv[optind]);
 

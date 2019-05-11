@@ -7,20 +7,24 @@
 #include <string>
 #include <fstream>
 
-#include "interface.h"
+//#include "interface.h"
+
+#include "iworker.h"
+#include "rsinterface.h"
 #include "const.h"
 #include "paramsrs.h"
 
-class WorkerRS
+class WorkerRS: public IWorker
 {
 public:
-    WorkerRS(ParamsRS& _params);
+    WorkerRS(TypeParams _params);
 
     WorkerRS(const WorkerRS &w) = delete;
     WorkerRS operator= (const WorkerRS &w) = delete;
 
     ~WorkerRS();
 
+    void startThread() { isRun = true; }
     void stopThread() { isRun = false; }
 
     class WorkerRSEx
@@ -32,13 +36,13 @@ public:
 
 protected:
     void virtual run_func();
-    Interface *interface();
+
     bool isRun;
 
 private:
     void run();
-    ParamsRS& params;
-    std::thread run_thread;
+    TypeParams params;
+    std::unique_ptr <std::thread> run_thread;
 };
 
 #endif // WORKERRS_H

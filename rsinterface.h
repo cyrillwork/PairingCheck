@@ -14,16 +14,16 @@
 
 
 #include "const.h"
-#include "abstract-interface.h"
+#include "iinterface.h"
 #include "paramsrs.h"
 
 using namespace std;
 
-class RSInterface : public AbstractInterface
+class RSInterface : public IInterface
 {
 public:
 
-    RSInterface(ParamsRS _params);
+    RSInterface(TypeParams _params);
 
     ~RSInterface() override;
 
@@ -37,7 +37,7 @@ public:
     int putCharWakeup(unsigned char symbol);
 
 private:
-    ParamsRS params;
+    //ParamsRS params;
 
     bool isFirstByte = false;
 

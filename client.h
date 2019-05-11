@@ -13,11 +13,11 @@
 class Client: public WorkerRS
 {
 public:
-    Client(ParamsRS _params, string fileName);
+    Client(TypeParams _params, string fileName);
     ~Client();
 
 protected:
-    void run_func();
+    void run_func() override;
 
 private:
     void openFile();
