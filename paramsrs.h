@@ -22,7 +22,7 @@ public:
 
     ParamsRS(string devPath, Parity parity, int speed, ByteSize byteSize);
 
-    const string getName() noexcept override { return string("Params RS-231"); }
+    const string getName() noexcept override { return string("RS232"); }
 
     Parity getParity() override { return parity; }
     void setParity(Parity parity) override { this->parity = parity; }

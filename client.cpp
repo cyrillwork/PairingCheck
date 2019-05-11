@@ -4,7 +4,7 @@
 
 
 Client::Client(TypeParams _params, string fileName):
-    WorkerRS(std::move(_params))
+    Worker(std::move(_params))
 
 {
     this->fileName = fileName;
@@ -45,7 +45,7 @@ void Client::openFile()
     if(!fileStream)
     {
         isRun = false;
-        throw WorkerRSEx("File do not opened " + fileName);
+        throw WorkerEx("File do not opened " + fileName);
     }
 }
 

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
                 getchar();
             }
-            catch (WorkerRS::WorkerRSEx ex)
+            catch (Worker::WorkerEx ex)
             {
                 cout << "Exception client: " << ex.message << endl;
                 return 0;
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 
                 getchar();
             }
-            catch (WorkerRS::WorkerRSEx ex)
+            catch (Worker::WorkerEx ex)
             {
                 cout << "Exception server: " << ex.message << endl;
                 return 0;

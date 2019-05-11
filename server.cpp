@@ -7,7 +7,7 @@
 
 int Server::countFiles = 0;
 
-Server::Server(TypeParams _params): WorkerRS(std::move(_params))
+Server::Server(TypeParams _params): Worker(std::move(_params))
 {
     isGetData = false;
 }

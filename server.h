@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class Server: public WorkerRS
+class Server: public Worker
 {
 public:
 

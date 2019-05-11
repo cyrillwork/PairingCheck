@@ -3,26 +3,39 @@
 #include "workerrs.h"
 
 
-WorkerRS::WorkerRS(TypeParams _params):
+Worker::Worker(TypeParams _params):
     params(std::move(_params))
 {
     //set up RS-interface
-    setInterface(make_shared<RSInterface>(std::move(params)));
+    if(params->getName() == "RS232")
+    {
+        setInterface(make_shared<RSInterface>(std::move(params)));
+    }
+    else
+    if(params->getName() == "UDP")
+    {
+        setInterface(make_shared<UDPInterface>(std::move(params)));
+    }
+    else
+    {
+        throw WorkerEx("Error unknown interface=" + params->getName());
+    }
 
     auto dev = getInterface()->getDevName();
-    std::cout << "WorkerRS devPath=" << dev << std::endl;
+
+    std::cout << "Worker devPath=" << dev << std::endl;
 
     if(!getInterface()->open())
     {
-        throw WorkerRSEx("Error open dev=" + dev);
+        throw WorkerEx("Error open dev=" + dev);
     }
 
     isRun = true;
 
-    run_thread = make_unique<std::thread>(&WorkerRS::run, this);
+    run_thread = make_unique<std::thread>(&Worker::run, this);
 }
 
-WorkerRS::~WorkerRS()
+Worker::~Worker()
 {
     isRun = false;
     run_thread->join();
@@ -30,12 +43,7 @@ WorkerRS::~WorkerRS()
     getInterface()->close();
 }
 
-void WorkerRS::run_func()
-{
-    cout << "WorkerRS run_func" << endl;
-}
-
-void WorkerRS::run()
+void Worker::run()
 {
 
     while(isRun)

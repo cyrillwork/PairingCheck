@@ -11,31 +11,30 @@
 
 #include "iworker.h"
 #include "rsinterface.h"
+#include "udpinterface.h"
 #include "const.h"
 #include "paramsrs.h"
 
-class WorkerRS: public IWorker
+class Worker: public IWorker
 {
 public:
-    WorkerRS(TypeParams _params);
+    Worker(TypeParams _params);
 
-    WorkerRS(const WorkerRS &w) = delete;
-    WorkerRS operator= (const WorkerRS &w) = delete;
+    Worker(const Worker &w) = delete;
 
-    ~WorkerRS();
+    ~Worker();
 
     void startThread() { isRun = true; }
     void stopThread() { isRun = false; }
 
-    class WorkerRSEx
+    class WorkerEx
     {
     public:
         string message;
-        WorkerRSEx(string message) { this->message = message; }
+        WorkerEx(string message) { this->message = message; }
     };
 
 protected:
-    void virtual run_func();
 
     bool isRun;
 

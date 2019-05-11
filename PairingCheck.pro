@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     workerrs.cpp \
     paramsrs.cpp \
     udpparams.cpp \
-    rsinterface.cpp
+    rsinterface.cpp \
+    udpinterface.cpp
 
 HEADERS += \
 #    interface.h \
@@ -31,4 +32,5 @@ HEADERS += \
     udpparams.h \
     rsinterface.h \
     iworker.h \
-    iinterface.h
+    iinterface.h \
+    udpinterface.h

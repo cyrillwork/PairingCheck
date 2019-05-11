@@ -7,7 +7,7 @@ class UDPParams : public IParams
 {
 public:
     UDPParams(std::string dev);
-    const std::string getName() noexcept override { return std::string("Params UDP"); }
+    const std::string getName() noexcept override { return std::string("UDP"); }
 };
 
 #endif // UDPPARAMS_H

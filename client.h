@@ -10,7 +10,7 @@
 #include "workerrs.h"
 #include "paramsrs.h"
 
-class Client: public WorkerRS
+class Client: public Worker
 {
 public:
     Client(TypeParams _params, string fileName);
