@@ -13,7 +13,7 @@
 class Client: public Worker
 {
 public:
-    Client(TypeParams _params, string fileName);
+    Client(TypeParams _params, TypeInterface interface, string fileName);
     ~Client();
 
 protected:

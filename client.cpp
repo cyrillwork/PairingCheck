@@ -3,12 +3,10 @@
 #include "client.h"
 
 
-Client::Client(TypeParams _params, string fileName):
-    Worker(std::move(_params))
-
+Client::Client(TypeParams _params, TypeInterface interface, string fileName):
+    Worker(_params, interface)
 {
     this->fileName = fileName;
-
     openFile();
 }
 

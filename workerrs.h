@@ -18,7 +18,7 @@
 class Worker: public IWorker
 {
 public:
-    Worker(TypeParams _params);
+    Worker(TypeParams _params, TypeInterface interface);
 
     Worker(const Worker &w) = delete;
 

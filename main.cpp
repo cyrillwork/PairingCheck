@@ -24,12 +24,30 @@ void printErrorMessage()
     cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;
 }
 
+TypeInterface interfaceFactory(TypeParams params)
+{
+    TypeInterface interface = nullptr;
+
+    //set up RS-interface
+    if(params->getName() == "RS232")
+    {
+        interface = make_shared<RSInterface>(params);
+    }
+    else
+    if(params->getName() == "UDP")
+    {
+        interface = make_shared<UDPInterface>(params);
+    }
+
+    return interface;
+}
+
 int main(int argc, char *argv[])
 {
     std::string fileName;
     int Mode = NONE;
 
-    TypeParams params = make_unique<ParamsRS>();
+    TypeParams params = make_shared<ParamsRS>();
 
     //cout << "Hello, server " << Server::getFileName() << endl;
 
@@ -67,89 +85,97 @@ int main(int argc, char *argv[])
             switch(c)
             {
 
-            case 's':
-                Mode = SERVER;
-                //printf("set option show time\n");
+                case 's':
+                    Mode = SERVER;
+                    //printf("set option show time\n");
                 break;
 
-            case 'c':
-                Mode = CLIENT;
-                //printf("set option link as file\n");
-                fileName = optarg;
+                case 'c':
+                    Mode = CLIENT;
+                    //printf("set option link as file\n");
+                    fileName = optarg;
                 break;
 
-            case 'd':
-                params->setDevPath(optarg);
+                case 'd':
+                    params->setDevPath(optarg);
                 break;
 
-            case 'b':
-            {
-                std::cout << "set baudrate" << optarg << std::endl;
-                params->setBaudRate(optarg);
-            }
-            break;
+                case 'b':
+                {
+                    std::cout << "set baudrate" << optarg << std::endl;
+                    params->setBaudRate(optarg);
+                }
+                break;
 
-            case 'w':
-            {
-                std::cout << "set 9th bit (wakeup bit)" << std::endl;
-                params->set9thBit(true);
-            }
-            break;
+                case 'w':
+                {
+                    std::cout << "set 9th bit (wakeup bit)" << std::endl;
+                    params->set9thBit(true);
+                }
+                break;
 
-            case '?':
-            {
-                printErrorMessage();
-                return 0;
-            }
+                case '?':
+                {
+                    printErrorMessage();
+                    return 0;
+                }
 
             }
         }
 
 
+
+        TypeInterface interface = interfaceFactory(params);
+
+        if(!interface)
+        {
+            cout << "Unkown interface type" << endl;
+            return 0;
+        }
 
         switch(Mode)
         {
-        case CLIENT:
-        {
-            try
+            case CLIENT:
             {
-                cout << "create client fileName=" << fileName << endl;
-                cout << "params->getDevPath() = " << params->getDevPath() << endl;
+                try
+                {
+                    cout << "create client fileName=" << fileName << endl;
+                    cout << "params->getDevPath() = " << params->getDevPath() << endl;
 
-                Client client(std::move(params), fileName);
+                    Client client(params, interface, fileName);
 
-                getchar();
+                    getchar();
+                }
+                catch (Worker::WorkerEx ex)
+                {
+                    cout << "Exception client: " << ex.message << endl;
+                    return 0;
+                }
             }
-            catch (Worker::WorkerEx ex)
-            {
-                cout << "Exception client: " << ex.message << endl;
-                return 0;
-            }
-        }
             break;
-        case SERVER:
-        {
-            try
+            case SERVER:
             {
-                cout << "create server" << endl;
-                cout << "params->getDevPath() = " << params->getDevPath() << endl;
-                Server server(std::move(params));
+                try
+                {
+                    cout << "create server" << endl;
+                    cout << "params->getDevPath() = " << params->getDevPath() << endl;
+                    Server server(params, interface);
 
-                //Server server(argv[optind]);
+                    //Server server(argv[optind]);
 
-                getchar();
+                    getchar();
+                }
+                catch (Worker::WorkerEx ex)
+                {
+                    cout << "Exception server: " << ex.message << endl;
+                    return 0;
+                }
             }
-            catch (Worker::WorkerEx ex)
-            {
-                cout << "Exception server: " << ex.message << endl;
-                return 0;
-            }
-        }
             break;
-        default:
-        {
-            printErrorMessage();
-        }
+            default:
+            {
+                printErrorMessage();
+            }
         }
 
 

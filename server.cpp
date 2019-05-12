@@ -7,7 +7,8 @@
 
 int Server::countFiles = 0;
 
-Server::Server(TypeParams _params): Worker(std::move(_params))
+Server::Server(TypeParams _params, TypeInterface interface):
+    Worker(_params, interface)
 {
     isGetData = false;
 }

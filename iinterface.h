@@ -21,14 +21,17 @@ std::unique_ptr<T> make_unique()
 
 #endif
 
-using TypeParams = std::unique_ptr<IParams>;
+class IInterface;
+
+using TypeParams = std::shared_ptr<IParams>;
+using TypeInterface = std::shared_ptr<IInterface>;
 
 //! Интерфейсный класс унифицированной библиотеки канальных частей
 class IInterface
 {
 public:
 
-    IInterface(TypeParams p): params(std::move(p)) {}
+    IInterface(TypeParams p): params(p) {}
 
     virtual ~IInterface() = default;
 

@@ -3,23 +3,11 @@
 #include "workerrs.h"
 
 
-Worker::Worker(TypeParams _params):
-    params(std::move(_params))
+Worker::Worker(TypeParams _params, TypeInterface interface):
+    params(_params)
 {
-    //set up RS-interface
-    if(params->getName() == "RS232")
-    {
-        setInterface(make_shared<RSInterface>(std::move(params)));
-    }
-    else
-    if(params->getName() == "UDP")
-    {
-        setInterface(make_shared<UDPInterface>(std::move(params)));
-    }
-    else
-    {
-        throw WorkerEx("Error unknown interface=" + params->getName());
-    }
+    //setup connection interface
+    setInterface(interface);
 
     auto dev = getInterface()->getDevName();
 

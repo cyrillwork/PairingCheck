@@ -13,7 +13,7 @@ class Server: public Worker
 {
 public:
 
-    Server(TypeParams _params);
+    Server(TypeParams _params, TypeInterface interface);
 
     static string getFileName();
 
