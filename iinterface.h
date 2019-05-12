@@ -43,7 +43,7 @@ public:
     virtual bool close() = 0;
     virtual int read(char *data, int size, int timeout) = 0;
     virtual int write(const char *data, int size) = 0;
-
+    virtual bool bind() { return true; }
 protected:
     //! All inferfaces have params refference
     TypeParams params;

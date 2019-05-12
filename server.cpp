@@ -11,6 +11,11 @@ Server::Server(TypeParams _params, TypeInterface interface):
     Worker(_params, interface)
 {
     isGetData = false;
+
+    if(_params->getName() == "UDP")
+    {
+        interface->bind();
+    }
 }
 
 string Server::getFileName()
@@ -30,6 +35,8 @@ void Server::run_func()
     char buff[BUFF_SIZE];
 
     int res = getInterface()->read(buff, BUFF_SIZE, DELAY_MSEC*1000);
+
+    //cout << "server get res="<< res << endl;
 
     if(res > 0)
     {

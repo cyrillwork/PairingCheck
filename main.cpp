@@ -6,6 +6,7 @@
 #include "client.h"
 #include "server.h"
 #include "paramsrs.h"
+#include "paramsudp.h"
 
 using namespace std;
 
@@ -19,8 +20,8 @@ enum
 void printErrorMessage()
 {
     cout << "Error. Usage: " << endl;
-    cout << "Server mode: PairingRS --server --devpath port [--wakeupbit] [--speed buadrate]" << endl;
-    cout << "Client mode: PairingRS --client filename --devpath port [--wakeupbit] [--speed buadrate]" << endl;
+    cout << "Server mode: PairingCheck --server --type [rs232|udp] --devpath port [--wakeupbit] [--speed buadrate]" << endl;
+    cout << "Client mode: PairingCheck --client filename --type [rs232|udp] --devpath port [--wakeupbit] [--speed buadrate]" << endl;
     cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;
 }
 
@@ -34,12 +35,27 @@ TypeInterface interfaceFactory(TypeParams params)
         interface = make_shared<RSInterface>(params);
     }
     else
-    if(params->getName() == "UDP")
-    {
-        interface = make_shared<UDPInterface>(params);
-    }
+        if(params->getName() == "UDP")
+        {
+            interface = make_shared<UDPInterface>(params);
+        }
 
     return interface;
+}
+
+TypeParams paramsFactory(const string type)
+{
+    TypeParams result = nullptr;
+    if(type == "UDP")
+    {
+        result = make_shared<ParamsUDP>();
+    }
+    else
+    if(type == "RS232")
+    {
+        result = make_shared<ParamsRS>();
+    }
+    return result;
 }
 
 int main(int argc, char *argv[])
@@ -47,7 +63,7 @@ int main(int argc, char *argv[])
     std::string fileName;
     int Mode = NONE;
 
-    TypeParams params = make_shared<ParamsRS>();
+    TypeParams params = nullptr;
 
     //cout << "Hello, server " << Server::getFileName() << endl;
 
@@ -62,6 +78,7 @@ int main(int argc, char *argv[])
         {"client",      required_argument,      0,  'c'},
         {"server",      no_argument,            0,  's'},
         {"devpath",     required_argument,      0,  'd'},
+        {"type",        required_argument,      0,  't'},
         {"speed",       required_argument,      0,  'b'},
         {"wakeupbit",   no_argument,            0,  'w'},
 
@@ -100,18 +117,25 @@ int main(int argc, char *argv[])
                     params->setDevPath(optarg);
                 break;
 
+                case 't':
+                    cout << "type=" << optarg << endl;
+                    params = paramsFactory(optarg);
+                    if(params == nullptr)
+                    {
+                        cout << "Error type=" << optarg << endl;
+                        printErrorMessage();
+                        exit(0);
+                    }
+                break;
+
                 case 'b':
-                {
                     std::cout << "set baudrate" << optarg << std::endl;
                     params->setBaudRate(optarg);
-                }
                 break;
 
                 case 'w':
-                {
                     std::cout << "set 9th bit (wakeup bit)" << std::endl;
                     params->set9thBit(true);
-                }
                 break;
 
                 case '?':
@@ -122,8 +146,6 @@ int main(int argc, char *argv[])
 
             }
         }
-
-
 
         TypeInterface interface = interfaceFactory(params);
 

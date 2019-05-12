@@ -18,10 +18,11 @@ enum class Parity
 
 enum ByteSize
 {
+    None = 0,
     _CS5 = CS5,
     _CS6 = CS6,
     _CS7 = CS7,
-    _CS8 = CS8
+    _CS8 = CS8,
 };
 
 
@@ -35,17 +36,17 @@ public:
 
     virtual const std::string getName() noexcept = 0;
 
-    virtual Parity getParity() = 0;
-    virtual void setParity(Parity parity) = 0;
+    virtual Parity getParity() { return Parity::None; }
+    virtual void setParity(Parity parity) {}
 
-    virtual int getBaudRate() = 0;
-    virtual void setBaudRate(std::string _speed ) = 0;
+    virtual int getBaudRate() { return 0; }
+    virtual void setBaudRate(std::string _speed) {}
 
-    virtual ByteSize getByteSize() = 0;
-    virtual void setByteSize(ByteSize byteSize) =  0;
+    virtual ByteSize getByteSize() { return ByteSize::None; }
+    virtual void setByteSize(ByteSize byteSize) {}
 
-    virtual void set9thBit(bool _is9thbit) = 0;
-    virtual bool get9thBit() = 0;
+    virtual void set9thBit(bool _is9thbit) {}
+    virtual bool get9thBit() { return false; }
 
     const std::string getDevPath() { return devPath; }
     void setDevPath(std::string dev) { devPath = dev; }

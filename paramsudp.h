@@ -3,10 +3,11 @@
 
 #include "iparams.h"
 
-class UDPParams : public IParams
+class ParamsUDP : public IParams
 {
 public:
-    UDPParams(std::string dev);
+    ParamsUDP():IParams("127.0.0.1") {}
+    ParamsUDP(std::string dev);
     const std::string getName() noexcept override { return std::string("UDP"); }
 };
 
