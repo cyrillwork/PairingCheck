@@ -27,18 +27,18 @@ void Client::run_func()
     {
         int res_send = getInterface()->write(buff, res);
         count_send += res_send;
-        cout << "Send " << count_send << " bytes" << endl;
+        std::cout << "Send " << count_send << " bytes" << std::endl;
     }
     else
     {
-        cout << "All data send "<< count_send <<", prees Enter" << endl;
+        std::cout << "All data send "<< count_send <<", prees Enter" << std::endl;
         isRun = false;
     }
 }
 
 void Client::openFile()
 {
-    fileStream.open(fileName, ios::binary);
+    fileStream.open(fileName, std::ios::binary);
 
     if(!fileStream)
     {

@@ -5,10 +5,19 @@
 
 
 RSInterface::RSInterface(TypeParams _params):
-    IInterface(std::move(_params)),
+    IInterface(_params),
     _channelId(-1)
 {
-    cout << "constructor RSInterface devPath=" << params->getDevPath() << endl;
+    params = dynamic_cast<TypeParamsRS>(_params);
+    if(params)
+    {
+        std::cout << "constructor RSInterface devPath=" << params->getDevPath() << std::endl;
+    }
+    else
+    {
+        std::cout << "Fatal Error get TypeParamsRS. Exit program" << std::endl;
+        exit(0);
+    }
 }
 
 RSInterface::~RSInterface()
@@ -17,8 +26,8 @@ RSInterface::~RSInterface()
 
 bool RSInterface::open()
 {
-    cout << "RSInterface::open() " << params->getDevPath() << endl;
-    cout << "params->get9thBit() " << params->get9thBit() << endl;
+    std::cout << "RSInterface::open() " << params->getDevPath() << std::endl;
+    std::cout << "params->get9thBit() " << params->get9thBit() << std::endl;
 
     isFirstByte = true;
 
@@ -26,7 +35,7 @@ bool RSInterface::open()
 
     if (_channelId < 0)
     {
-        cout << "Can't open device" << params->getDevPath() << endl;
+        std::cout << "Can't open device" << params->getDevPath() << std::endl;
         perror(params->getDevPath().c_str());
         return false;
     }

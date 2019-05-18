@@ -22,7 +22,7 @@ protected:
 private:
     void openFile();
 
-    ifstream fileStream;
+    std::ifstream fileStream;
     string fileName;
 };
 

@@ -1,10 +1,21 @@
+#include <iostream>
+
 #include "udpinterface.h"
 #include "const.h"
 
 UDPInterface::UDPInterface(TypeParams _params):
-    IInterface(std::move(_params))
+    IInterface(_params)
 {
-
+    params = dynamic_cast<TypeParamsUDP>(_params);
+    if(params)
+    {
+        std::cout << "constructor UDP Interface devPath=" << params->getDevPath() << std::endl;
+    }
+    else
+    {
+        std::cout << "Fatal Error get TypeParamsUDP. Exit program" << std::endl;
+        exit(0);
+    }
 }
 
 bool UDPInterface::open()

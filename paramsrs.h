@@ -7,34 +7,57 @@
 #include <unordered_map>
 #include <iostream>
 
-using namespace std;
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
+
+enum class Parity
+{
+    None = 0,
+    Odd  = (PARENB | PARODD),
+    Even = PARENB
+};
+
+enum ByteSize
+{
+    None = 0,
+    _CS5 = CS5,
+    _CS6 = CS6,
+    _CS7 = CS7,
+    _CS8 = CS8,
+};
 
 
 class ParamsRS;
-using TypeParamsRS = std::unique_ptr<ParamsRS>;
+using TypeParamsRS = ParamsRS*;//std::unique_ptr<ParamsRS>;
+
+using std::string;
 
 class ParamsRS: public IParams
 {
 public:
+
     ParamsRS();
 
     ParamsRS (ParamsRS &params);
 
     ParamsRS(string devPath, Parity parity, int speed, ByteSize byteSize);
 
-    const string getName() noexcept override { return string("RS232"); }
+    const string getName() const override { return string("RS232"); }
 
-    Parity getParity() override { return parity; }
-    void setParity(Parity parity) override { this->parity = parity; }
+    Parity getParity() { return parity; }
+    void setParity(Parity parity) { this->parity = parity; }
 
-    int getBaudRate() override { return speed; }
-    void setBaudRate ( string _speed ) override;
+    int getBaudRate() { return speed; }
+    void setBaudRate ( string _speed );
 
-    ByteSize getByteSize() override { return byteSize; }
-    void setByteSize(ByteSize byteSize) override { this->byteSize = byteSize; }
+    ByteSize getByteSize() { return byteSize; }
+    void setByteSize(ByteSize byteSize) { this->byteSize = byteSize; }
 
-    void set9thBit(bool _is9thbit) override { this->Is9thbit = _is9thbit; }
-    bool get9thBit() override { return this->Is9thbit; }
+    void set9thBit(bool _is9thbit) { this->Is9thbit = _is9thbit; }
+    bool get9thBit() { return this->Is9thbit; }
 
 private:
     Parity parity; // "None"

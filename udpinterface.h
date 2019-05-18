@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include "paramsudp.h"
 #include "iinterface.h"
 
 
@@ -30,6 +31,8 @@ private:
     sockaddr_in sock_addr;
     bool isFirstByte = false;
     int sockfd;
+
+    TypeParamsUDP params;
 };
 
 #endif // UDPINTERFACE_H

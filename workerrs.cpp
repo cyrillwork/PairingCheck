@@ -37,7 +37,7 @@ void Worker::run()
     while(isRun)
     {
         run_func();
-        std::this_thread::sleep_for(chrono::milliseconds(DELAY_MSEC));
+        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_MSEC));
     }
 }
 

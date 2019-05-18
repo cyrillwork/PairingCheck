@@ -5,19 +5,12 @@
 
 #include <iostream>
 #include <map>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <unistd.h>
 #include <cstring>
 
 
 #include "const.h"
 #include "iinterface.h"
 #include "paramsrs.h"
-
-using namespace std;
 
 class RSInterface : public IInterface
 {
@@ -43,6 +36,7 @@ private:
 
     int _channelId;   
     struct termios newtio0;
+    TypeParamsRS params;
 };
 
 #endif // RS_INTERFACE_H

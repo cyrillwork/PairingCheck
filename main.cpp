@@ -8,6 +8,11 @@
 #include "paramsrs.h"
 #include "paramsudp.h"
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/istreamwrapper.h"
+
 using namespace std;
 
 enum
@@ -48,12 +53,12 @@ TypeParams paramsFactory(const string type)
     TypeParams result = nullptr;
     if(type == "UDP")
     {
-        result = make_shared<ParamsUDP>();
+        result = new ParamsUDP();
     }
     else
     if(type == "RS232")
     {
-        result = make_shared<ParamsRS>();
+        result = new ParamsRS();
     }
     return result;
 }
@@ -66,6 +71,35 @@ int main(int argc, char *argv[])
     TypeParams params = nullptr;
 
     //cout << "Hello, server " << Server::getFileName() << endl;
+    {
+        using namespace rapidjson;
+        std::ifstream ifs("config/rs232_server.json");
+
+        if(ifs)
+        {
+            Document document;
+            IStreamWrapper wp(ifs);
+
+            document.ParseStream(wp);
+
+            for(auto it=document.MemberBegin(); it<document.MemberEnd(); ++it)
+            {
+                std::cout << "Element name=" <<it->name.GetString() << std::endl;
+                if(it->value.IsObject())
+                {
+                    std::cout << "It's Object" << std::endl;
+                    const Value &doc = it->value;
+                    std::cout << "DevPath = "   << doc["DevPath"].GetString() << std::endl;
+                    std::cout << "ByteSize = "  << doc["ByteSize"].GetString() << std::endl;
+                    std::cout << "Parity = "    << doc["Parity"].GetString() << std::endl;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Error. Config file not exist" << std::endl;
+        }
+    }
 
     if(argc < 3)
     {
@@ -130,12 +164,23 @@ int main(int argc, char *argv[])
 
                 case 'b':
                     std::cout << "set baudrate" << optarg << std::endl;
-                    params->setBaudRate(optarg);
+                    {
+//                        ParamsRS prs;
+//                        IParams *pp = &prs;
+//                        ParamsRS *prs2 = dynamic_cast<ParamsRS *>(pp);
+//                        prs2->setBaudRate(optarg);
+
+                        TypeParamsRS p = dynamic_cast<TypeParamsRS>(params);
+                        p->setBaudRate(optarg);
+                    }
                 break;
 
                 case 'w':
+                {
                     std::cout << "set 9th bit (wakeup bit)" << std::endl;
-                    params->set9thBit(true);
+                    TypeParamsRS p = dynamic_cast<TypeParamsRS>(params);
+                    p->set9thBit(true);
+                }
                 break;
 
                 case '?':
@@ -171,7 +216,6 @@ int main(int argc, char *argv[])
                 catch (Worker::WorkerEx ex)
                 {
                     cout << "Exception client: " << ex.message << endl;
-                    return 0;
                 }
             }
             break;
@@ -190,7 +234,6 @@ int main(int argc, char *argv[])
                 catch (Worker::WorkerEx ex)
                 {
                     cout << "Exception server: " << ex.message << endl;
-                    return 0;
                 }
             }
             break;
@@ -199,8 +242,12 @@ int main(int argc, char *argv[])
                 printErrorMessage();
             }
         }
-
-
     }
+
+    if(params)
+    {
+        delete params;
+    }
+
     return 0;
 }
