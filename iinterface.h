@@ -23,7 +23,7 @@ std::unique_ptr<T> make_unique()
 
 class IInterface;
 
-using TypeParams = IParams*; //std::shared_ptr<IParams>;
+
 using TypeInterface = std::shared_ptr<IInterface>;
 
 //! Интерфейсный класс унифицированной библиотеки канальных частей

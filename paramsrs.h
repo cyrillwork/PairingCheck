@@ -59,6 +59,8 @@ public:
     void set9thBit(bool _is9thbit) { this->Is9thbit = _is9thbit; }
     bool get9thBit() { return this->Is9thbit; }
 
+    virtual bool fromJSON(const rapidjson::Value &doc) override;
+
 private:
     Parity parity; // "None"
     int speed;

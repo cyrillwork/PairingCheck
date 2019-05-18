@@ -1,0 +1,9 @@
+{
+	"Type": "RS232",
+	"Params": {
+		"DevPath": "/dev/ttyS0",
+		"Speed": "9600",
+		"ByteSize": "CS8",
+		"Parity": "None"
+	}
+}

@@ -8,6 +8,13 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/istreamwrapper.h"
+
+class IParams;
+using TypeParams = IParams*; //std::shared_ptr<IParams>;
 
 class IParams
 {
@@ -18,6 +25,8 @@ public:
 
     const std::string getDevPath() { return devPath; }
     void setDevPath(std::string dev) { devPath = dev; }
+
+    virtual bool fromJSON(const rapidjson::Value &doc) = 0;
 
 protected:
     std::string devPath;

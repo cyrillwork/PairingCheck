@@ -13,6 +13,9 @@ public:
     ParamsUDP(std::string dev);
 
     const std::string getName() const override { return std::string("UDP"); }
+
+    virtual bool fromJSON(const rapidjson::Value &doc) override;
+
 };
 
 #endif // UDPPARAMS_H

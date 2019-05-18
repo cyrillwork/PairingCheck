@@ -41,3 +41,49 @@ void ParamsRS::setBaudRate(string _speed)
         speed   = baudeRate["9600"];
     }
 }
+
+bool ParamsRS::fromJSON(const rapidjson::Value &doc)
+{
+    bool result = false;
+
+    if(doc.IsObject())
+    {
+        bool isOK = true;
+        const char* members[] = { "DevPath", "Speed", "ByteSize", "Parity" };
+
+        for(size_t i = 0; i < sizeof(members)/sizeof(members[0]); ++i)
+        {
+            if(!doc.HasMember(members[i]))
+            {
+                isOK = false;
+                break;
+            }
+        }
+
+        if(isOK)
+        {
+            //uint64_t id = doc["DevPath"].GetUint64();
+            setDevPath(doc["DevPath"].GetString());
+
+            setBaudRate(doc["Speed"].GetString());
+
+            string str_parity(doc["Parity"].GetString());
+
+            if(str_parity == "Even")
+            {
+                parity = Parity::Even;
+            }
+            else
+                if(str_parity == "Odd")
+                {
+                    parity = Parity::Odd;
+                }
+
+            result = true;
+        }
+    }
+
+
+    return result;
+
+}

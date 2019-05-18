@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../PairingCheck --server --type RS232 --devpath /dev/ttyS0
+../PairingCheck --server --configfile ./config/rs232_server.json

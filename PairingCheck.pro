@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     paramsrs.cpp \
     rsinterface.cpp \
     udpinterface.cpp \
-    paramsudp.cpp
+    paramsudp.cpp \
+    configfileparser.cpp
 
 HEADERS += \
 #    interface.h \
@@ -33,4 +34,5 @@ HEADERS += \
     iworker.h \
     iinterface.h \
     udpinterface.h \
-    paramsudp.h
+    paramsudp.h \
+    configfileparser.h

@@ -1,4 +1,4 @@
 #!/bin/bash
 
-../PairingCheck --client ../test.txt --type RS232 --devpath /dev/ttyS1
+../PairingCheck --client ../test.txt --configfile ./config/rs232_client.json
 

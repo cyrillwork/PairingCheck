@@ -5,13 +5,7 @@
 
 #include "client.h"
 #include "server.h"
-#include "paramsrs.h"
-#include "paramsudp.h"
-
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/istreamwrapper.h"
+#include "configfileparser.h"
 
 using namespace std;
 
@@ -25,8 +19,8 @@ enum
 void printErrorMessage()
 {
     cout << "Error. Usage: " << endl;
-    cout << "Server mode: PairingCheck --server --type [rs232|udp] --devpath port [--wakeupbit] [--speed buadrate]" << endl;
-    cout << "Client mode: PairingCheck --client filename --type [rs232|udp] --devpath port [--wakeupbit] [--speed buadrate]" << endl;
+    cout << "Server mode: PairingCheck --server --configfile.json " << endl;
+    cout << "Client mode: PairingCheck --client filename --config configfile.json" << endl;
     cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;
 }
 
@@ -48,21 +42,6 @@ TypeInterface interfaceFactory(TypeParams params)
     return interface;
 }
 
-TypeParams paramsFactory(const string type)
-{
-    TypeParams result = nullptr;
-    if(type == "UDP")
-    {
-        result = new ParamsUDP();
-    }
-    else
-    if(type == "RS232")
-    {
-        result = new ParamsRS();
-    }
-    return result;
-}
-
 int main(int argc, char *argv[])
 {
     std::string fileName;
@@ -71,35 +50,6 @@ int main(int argc, char *argv[])
     TypeParams params = nullptr;
 
     //cout << "Hello, server " << Server::getFileName() << endl;
-    {
-        using namespace rapidjson;
-        std::ifstream ifs("config/rs232_server.json");
-
-        if(ifs)
-        {
-            Document document;
-            IStreamWrapper wp(ifs);
-
-            document.ParseStream(wp);
-
-            for(auto it=document.MemberBegin(); it<document.MemberEnd(); ++it)
-            {
-                std::cout << "Element name=" <<it->name.GetString() << std::endl;
-                if(it->value.IsObject())
-                {
-                    std::cout << "It's Object" << std::endl;
-                    const Value &doc = it->value;
-                    std::cout << "DevPath = "   << doc["DevPath"].GetString() << std::endl;
-                    std::cout << "ByteSize = "  << doc["ByteSize"].GetString() << std::endl;
-                    std::cout << "Parity = "    << doc["Parity"].GetString() << std::endl;
-                }
-            }
-        }
-        else
-        {
-            std::cout << "Error. Config file not exist" << std::endl;
-        }
-    }
 
     if(argc < 3)
     {
@@ -111,6 +61,7 @@ int main(int argc, char *argv[])
         {
         {"client",      required_argument,      0,  'c'},
         {"server",      no_argument,            0,  's'},
+        {"configfile",  required_argument,      0,  'f'},
         {"devpath",     required_argument,      0,  'd'},
         {"type",        required_argument,      0,  't'},
         {"speed",       required_argument,      0,  'b'},
@@ -123,7 +74,6 @@ int main(int argc, char *argv[])
         while(true)
         {
             int c;
-
             int option_index = 0;
 
             c = getopt_long(argc, argv, optString, long_options, &option_index);
@@ -135,7 +85,6 @@ int main(int argc, char *argv[])
 
             switch(c)
             {
-
                 case 's':
                     Mode = SERVER;
                     //printf("set option show time\n");
@@ -147,39 +96,17 @@ int main(int argc, char *argv[])
                     fileName = optarg;
                 break;
 
-                case 'd':
-                    params->setDevPath(optarg);
-                break;
-
-                case 't':
-                    cout << "type=" << optarg << endl;
-                    params = paramsFactory(optarg);
-                    if(params == nullptr)
+                case 'f':
+                {
+                    ConfigFileParser parser(optarg);
+                    if(!parser.Init())
                     {
-                        cout << "Error type=" << optarg << endl;
+                        cout << "Error parse file " << optarg << endl;
                         printErrorMessage();
                         exit(0);
                     }
-                break;
+                    params = parser.getParams();
 
-                case 'b':
-                    std::cout << "set baudrate" << optarg << std::endl;
-                    {
-//                        ParamsRS prs;
-//                        IParams *pp = &prs;
-//                        ParamsRS *prs2 = dynamic_cast<ParamsRS *>(pp);
-//                        prs2->setBaudRate(optarg);
-
-                        TypeParamsRS p = dynamic_cast<TypeParamsRS>(params);
-                        p->setBaudRate(optarg);
-                    }
-                break;
-
-                case 'w':
-                {
-                    std::cout << "set 9th bit (wakeup bit)" << std::endl;
-                    TypeParamsRS p = dynamic_cast<TypeParamsRS>(params);
-                    p->set9thBit(true);
                 }
                 break;
 
@@ -199,6 +126,13 @@ int main(int argc, char *argv[])
             cout << "Unkown interface type" << endl;
             return 0;
         }
+
+        if(!params)
+        {
+            cout << "Unkown config data file" << endl;
+            return 0;
+        }
+
 
         switch(Mode)
         {
