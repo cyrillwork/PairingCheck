@@ -25,7 +25,9 @@ public:
 
     bool open() override;
     bool close() override;
+    /* timeout - micro seconds*/
     int read(char *data, int size, int timeout) override;
+
     int write(const char *data, int size) override;
     int putCharWakeup(unsigned char symbol);
 

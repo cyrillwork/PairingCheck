@@ -22,22 +22,33 @@ void printErrorMessage()
     cout << "Server mode: PairingCheck --server --configfile.json " << endl;
     cout << "Client mode: PairingCheck --client filename --config configfile.json" << endl;
     cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;
+
+    cout << "For generate config file: " << endl;
+    cout << "PairingCheck --generate type[RS232|UDP]" << endl;
 }
 
 TypeInterface interfaceFactory(TypeParams params)
 {
     TypeInterface interface = nullptr;
 
-    //set up RS-interface
-    if(params->getName() == "RS232")
+    switch (params->getType())
     {
-        interface = make_shared<RSInterface>(params);
-    }
-    else
-        if(params->getName() == "UDP")
+        case TypeParam::RS232:
+        {//set up RS-interface
+            interface = make_shared<RSInterface>(params);
+        }
+        break;
+
+        case TypeParam::UDP:
         {
             interface = make_shared<UDPInterface>(params);
         }
+        break;
+
+        case TypeParam::None:
+            cout << "Error get param, interfaceFactory!!!" << endl;
+        break;
+    }
 
     return interface;
 }
@@ -65,6 +76,7 @@ int main(int argc, char *argv[])
         {"devpath",     required_argument,      0,  'd'},
         {"type",        required_argument,      0,  't'},
         {"speed",       required_argument,      0,  'b'},
+        {"generate",    required_argument,      0,  'g'},
         {"wakeupbit",   no_argument,            0,  'w'},
 
     };
@@ -107,6 +119,22 @@ int main(int argc, char *argv[])
                     }
                     params = parser.getParams();
 
+                }
+                break;
+
+                case 'g':
+                {
+                    TypeParam type = IParams::getTypeParam(optarg);
+                    if(type != TypeParam::None)
+                    {
+                        ConfigFileParser::generateJSON(type);
+                    }
+                    else
+                    {
+                        cout << "Error generate configfile. Wrong type " << optarg << endl;
+                        printErrorMessage();
+                    }
+                    exit(0);
                 }
                 break;
 

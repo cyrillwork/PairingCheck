@@ -30,27 +30,32 @@ enum ByteSize
 };
 
 
-class ParamsRS;
-using TypeParamsRS = ParamsRS*;//std::unique_ptr<ParamsRS>;
+class ParamsRS232;
+using TypeParamsRS = ParamsRS232*;//std::unique_ptr<ParamsRS>;
 
 using std::string;
 
-class ParamsRS: public IParams
+class ParamsRS232: public IParams
 {
 public:
 
-    ParamsRS();
+    ParamsRS232 (ParamsRS232 &params);
 
-    ParamsRS (ParamsRS &params);
-
-    ParamsRS(string devPath, Parity parity, int speed, ByteSize byteSize);
+    ParamsRS232(string _devPath = "/dev/ttyS0", Parity _parity = Parity::None,
+                            int _speed = B9600, ByteSize _byteSize = ByteSize::_CS8);
 
     const string getName() const override { return string("RS232"); }
+
+    TypeParam getType() const override { return TypeParam::RS232; }
 
     Parity getParity() { return parity; }
     void setParity(Parity parity) { this->parity = parity; }
 
     int getBaudRate() { return speed; }
+
+    std::string getBaudRateString();
+    std::string getByteSizeString();
+
     void setBaudRate ( string _speed );
 
     ByteSize getByteSize() { return byteSize; }
@@ -61,13 +66,14 @@ public:
 
     virtual bool fromJSON(const rapidjson::Value &doc) override;
 
+    virtual void toJSON(rapidjson::Document &doc) override;
+
 private:
     Parity parity; // "None"
     int speed;
     ByteSize byteSize;
 
     bool Is9thbit = false;
-
     std::unordered_map <string, int> baudeRate =
     {
         { "50",  B50 },

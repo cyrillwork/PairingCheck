@@ -27,6 +27,8 @@ public:
     int read(char *data, int size, int timeout) override;
     int write(const char *data, int size) override;
 
+    bool check_sock(int sock, int timeout);
+
 private:
     sockaddr_in sock_addr;
     bool isFirstByte = false;

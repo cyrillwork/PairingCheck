@@ -17,3 +17,7 @@ bool ParamsUDP::fromJSON(const rapidjson::Value &doc)
     return result;
 }
 
+void ParamsUDP::toJSON(rapidjson::Document& doc)
+{
+}
+

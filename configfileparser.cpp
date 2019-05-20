@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 
+
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
@@ -35,17 +36,7 @@ bool ConfigFileParser::Init()
 
             if(node == "Type")
             {
-                string type(it->value.GetString());
-
-                if(type == "UDP")
-                {
-                    params = new ParamsUDP();
-                }
-                else
-                    if(type == "RS232")
-                    {
-                        params = new ParamsRS();
-                    }
+                params = factoryParams(IParams::getTypeParam(it->value.GetString()));
             }
 
             if((node == "Params") && (params))
@@ -59,6 +50,64 @@ bool ConfigFileParser::Init()
     {
         std::cout << "Error. Config file not exist" << std::endl;
     }
+
+    return result;
+}
+
+bool ConfigFileParser::generateJSON(TypeParam type)
+{
+    bool result = false;
+    TypeParams temp_params = factoryParams(type);
+
+    if(temp_params)
+    {
+        rapidjson::Document doc;
+
+        auto& allocator = doc.GetAllocator();
+        doc.SetObject();
+
+        doc.AddMember("Type", "RS232", allocator);
+
+        temp_params->toJSON(doc);
+
+        rapidjson::StringBuffer buffer;
+        //rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        doc.Accept(writer);
+
+        std::string filename("generate_");
+        filename += temp_params->getName();
+        filename += ".json";
+
+        std::ofstream out(filename);
+        if(!out)
+        {
+            std::cout << "Error open file " << filename << std::endl;
+            return result;
+        }
+
+        out << buffer.GetString();
+        out.close();
+
+        result = true;
+    }
+
+    return result;
+}
+
+TypeParams ConfigFileParser::factoryParams(TypeParam type)
+{
+    TypeParams result = nullptr;
+
+    if(type == TypeParam::RS232)
+    {
+        result = new ParamsRS232("/dev/ttyS0");
+    }
+    else
+        if(type == TypeParam::UDP)
+        {
+            result = new ParamsUDP();
+        }
 
     return result;
 }

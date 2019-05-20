@@ -22,6 +22,7 @@ SOURCES += main.cpp \
     paramsudp.cpp \
     configfileparser.cpp
 
+
 HEADERS += \
 #    interface.h \
     client.h \

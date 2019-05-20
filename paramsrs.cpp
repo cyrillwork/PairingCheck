@@ -1,15 +1,7 @@
 #include "paramsrs.h"
 
 
-ParamsRS::ParamsRS(): IParams("/dev/ttyS0")
-{
-    //set default state
-    parity  = Parity::None;
-    speed   = baudeRate["9600"];
-    byteSize = ByteSize::_CS8;
-}
-
-ParamsRS::ParamsRS(ParamsRS &params):
+ParamsRS232::ParamsRS232(ParamsRS232 &params):
     IParams(params.getDevPath()),
     parity(params.getParity()),
     speed(params.getBaudRate()),
@@ -19,15 +11,43 @@ ParamsRS::ParamsRS(ParamsRS &params):
 
 }
 
-ParamsRS::ParamsRS(string dev, Parity parity, int speed, ByteSize byteSize):
-    IParams(dev)
+ParamsRS232::ParamsRS232(string _devPath, Parity _parity, int _speed, ByteSize _byteSize):
+    IParams(_devPath),
+    parity(_parity),
+    speed(_speed),
+    byteSize(_byteSize)
 {
-    parity      = parity;
-    speed       = speed;
-    byteSize    = byteSize;
 }
 
-void ParamsRS::setBaudRate(string _speed)
+std::string ParamsRS232::getBaudRateString()
+{
+    std::string result = {""};
+
+    for(auto it: baudeRate)
+    {
+        if(it.second == speed)
+        {
+            return string(it.first);
+        }
+    }
+
+    return string(result);
+}
+
+std::string ParamsRS232::getByteSizeString()
+{
+    std::string res="";
+    switch(byteSize)
+    {
+        case ByteSize::_CS5: res= "CS5"; break;
+        case ByteSize::_CS6: res= "CS6"; break;
+        case ByteSize::_CS7: res= "CS7"; break;
+        case ByteSize::_CS8: res= "CS8"; break;
+    }
+    return std::string(res);
+}
+
+void ParamsRS232::setBaudRate(string _speed)
 {
     auto it = baudeRate.find(_speed);
 
@@ -42,14 +62,15 @@ void ParamsRS::setBaudRate(string _speed)
     }
 }
 
-bool ParamsRS::fromJSON(const rapidjson::Value &doc)
+
+bool ParamsRS232::fromJSON(const rapidjson::Value &doc)
 {
     bool result = false;
+    const char* members[] = { "DevPath", "Speed", "Parity", "ByteSize", "WakeUP9Bit"};
 
     if(doc.IsObject())
     {
         bool isOK = true;
-        const char* members[] = { "DevPath", "Speed", "ByteSize", "Parity" };
 
         for(size_t i = 0; i < sizeof(members)/sizeof(members[0]); ++i)
         {
@@ -63,11 +84,10 @@ bool ParamsRS::fromJSON(const rapidjson::Value &doc)
         if(isOK)
         {
             //uint64_t id = doc["DevPath"].GetUint64();
-            setDevPath(doc["DevPath"].GetString());
+            setDevPath(doc[members[0]].GetString());
+            setBaudRate(doc[members[1]].GetString());
 
-            setBaudRate(doc["Speed"].GetString());
-
-            string str_parity(doc["Parity"].GetString());
+            string str_parity(doc[members[2]].GetString());
 
             if(str_parity == "Even")
             {
@@ -79,11 +99,72 @@ bool ParamsRS::fromJSON(const rapidjson::Value &doc)
                     parity = Parity::Odd;
                 }
 
+            string str_bs(doc[members[3]].GetString());
+            if(str_bs == "CS8")
+            {
+                byteSize = ByteSize::_CS8;
+            }
+            else
+                if(str_bs == "CS7")
+                {
+                    byteSize = ByteSize::_CS7;
+                }
+                else
+                    if(str_bs == "CS6")
+                    {
+                        byteSize = ByteSize::_CS6;
+                    }
+                    else
+                        if(str_bs == "CS5")
+                        {
+                            byteSize = ByteSize::_CS5;
+                        }
+
+
+            if(std::string(doc[members[4]].GetString()) == "True")
+                Is9thbit = true;
+            else
+                Is9thbit= false;
+
             result = true;
         }
     }
-
-
     return result;
+}
 
+void ParamsRS232::toJSON(rapidjson::Document &doc)
+{
+    auto& allocator = doc.GetAllocator();
+
+    rapidjson::Value val;
+    rapidjson::Value obj(rapidjson::kObjectType);
+
+    val.SetString(getDevPath().c_str(), allocator);
+    obj.AddMember("DevPath", val, allocator);
+
+    val.SetString(getBaudRateString().c_str(), allocator);
+    obj.AddMember("Speed", val, allocator);
+
+
+    string str_parity("None");
+    if(parity == Parity::Odd)
+    {
+        str_parity = "Odd";
+    }
+    else
+        if(parity == Parity::Even)
+        {
+            str_parity = "Even";
+        }
+
+    val.SetString(str_parity.c_str(), allocator);
+    obj.AddMember("Parity", val, allocator);
+
+    val.SetString(getByteSizeString().c_str(), allocator);
+    obj.AddMember("ByteSize", val, allocator);
+
+    val.SetString(Is9thbit ? "True":"False", allocator);
+    obj.AddMember("WakeUP9Bit", val, allocator);
+
+    doc.AddMember("Params", obj, allocator);
 }

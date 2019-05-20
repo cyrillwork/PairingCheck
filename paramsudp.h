@@ -13,8 +13,11 @@ public:
     ParamsUDP(std::string dev);
 
     const std::string getName() const override { return std::string("UDP"); }
+    TypeParam getType() const override { return TypeParam::UDP; }
 
     virtual bool fromJSON(const rapidjson::Value &doc) override;
+    virtual void toJSON(rapidjson::Document &doc) override;
+
 
 };
 
