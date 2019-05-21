@@ -10,26 +10,20 @@
 #include "workerrs.h"
 #include "paramsrs.h"
 
-class Client: public WorkerRS
+class Client: public Worker
 {
-
 public:
-    //Client(string devPath, string fileName);
-    Client(ParamsRS _params, string fileName);
-
+    Client(TypeParams _params, TypeInterface interface, string fileName);
     ~Client();
 
 protected:
-    void run_func();
+    void run_func() override;
 
 private:
     void openFile();
 
-    //ParamsRS params;
-
-    ifstream fileStream;
+    std::ifstream fileStream;
     string fileName;
-
 };
 
 #endif // CLIENT_H

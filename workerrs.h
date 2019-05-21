@@ -7,38 +7,41 @@
 #include <string>
 #include <fstream>
 
-#include "interface.h"
+//#include "interface.h"
+
+#include "iworker.h"
+#include "rsinterface.h"
+#include "udpinterface.h"
 #include "const.h"
 #include "paramsrs.h"
 
-class WorkerRS
+class Worker: public IWorker
 {
 public:
-    WorkerRS(ParamsRS& _params);
+    Worker(TypeParams _params, TypeInterface interface);
 
-    WorkerRS(const WorkerRS &w) = delete;
-    WorkerRS operator= (const WorkerRS &w) = delete;
+    Worker(const Worker &w) = delete;
 
-    ~WorkerRS();
+    ~Worker();
 
+    void startThread() { isRun = true; }
     void stopThread() { isRun = false; }
 
-    class WorkerRSEx
+    class WorkerEx
     {
     public:
         string message;
-        WorkerRSEx(string message) { this->message = message; }
+        WorkerEx(string message) { this->message = message; }
     };
 
 protected:
-    void virtual run_func();
-    Interface *interface();
+
     bool isRun;
 
 private:
     void run();
-    ParamsRS& params;
-    std::thread run_thread;
+    TypeParams params;
+    std::unique_ptr <std::thread> run_thread;
 };
 
 #endif // WORKERRS_H

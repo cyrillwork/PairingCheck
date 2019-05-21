@@ -1,14 +1,23 @@
 //This is an open source non-commercial project. Dear PVS-Studio, please check it.
 
-#include "rs_interface.h"
+#include "rsinterface.h"
 #include <thread>
 
 
-RSInterface::RSInterface(ParamsRS _params):
-    params(_params),
+RSInterface::RSInterface(TypeParams _params):
+    IInterface(_params),
     _channelId(-1)
 {
-    cout << "constructor RSInterface devPath=" << params.getDevPath() << endl;
+    params = dynamic_cast<TypeParamsRS>(_params);
+    if(params)
+    {
+        std::cout << "constructor RSInterface devPath=" << params->getDevPath() << std::endl;
+    }
+    else
+    {
+        std::cout << "Fatal Error get TypeParamsRS. Exit program" << std::endl;
+        exit(0);
+    }
 }
 
 RSInterface::~RSInterface()
@@ -17,24 +26,24 @@ RSInterface::~RSInterface()
 
 bool RSInterface::open()
 {
-    cout << "RSInterface::open() " << params.getDevPath() << endl;
-    cout << "params.get9thBit() " << params.get9thBit() << endl;
+    std::cout << "RSInterface::open() " << params->getDevPath() << std::endl;
+    std::cout << "params->get9thBit() " << params->get9thBit() << std::endl;
 
     isFirstByte = true;
 
-    _channelId = ::open(params.getDevPath().c_str(), O_RDWR | O_NONBLOCK /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
+    _channelId = ::open(params->getDevPath().c_str(), O_RDWR | O_NONBLOCK /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
 
     if (_channelId < 0)
     {
-        cout << "Can't open device" << params.getDevPath() << endl;
-        perror(params.getDevPath().c_str());
+        std::cout << "Can't open device" << params->getDevPath() << std::endl;
+        perror(params->getDevPath().c_str());
         return false;
     }
 
     memset (&newtio0, 0, sizeof (newtio0));
 
 
-    if(params.get9thBit())
+    if(params->get9thBit())
     {
         // 9th bit
         newtio0.c_iflag = IGNBRK;
@@ -60,8 +69,8 @@ bool RSInterface::open()
         newtio0.c_cc[VMIN] = 0;
         newtio0.c_cc[VTIME]= 0;
 
-        cfsetospeed(&newtio0, params.getBaudRate() );
-        cfsetispeed(&newtio0, params.getBaudRate() );
+        cfsetospeed(&newtio0, params->getBaudRate() );
+        cfsetispeed(&newtio0, params->getBaudRate() );
 
         tcflush (_channelId, TCIFLUSH);
         tcsetattr (_channelId, TCSANOW, &newtio0);
@@ -76,7 +85,7 @@ bool RSInterface::open()
     }
     else
     {
-        newtio0.c_cflag = params.getBaudRate() | params.getByteSize() | CLOCAL | CREAD | (int)params.getParity();
+        newtio0.c_cflag = params->getBaudRate() | params->getByteSize() | CLOCAL | CREAD | (int)params->getParity();
 
         newtio0.c_cflag &= ~CRTSCTS;
         newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
@@ -130,7 +139,7 @@ int RSInterface::write(const char *data, int size)
         return -1;
     }
 
-    if(params.get9thBit() && isFirstByte)
+    if(params->get9thBit() && isFirstByte)
     {
         isFirstByte = false;
 
@@ -194,7 +203,7 @@ int RSInterface::putCharWakeup(unsigned char symbol)
     rc = ::write(_channelId, &symbol, 1);
 
 
-    //if(!params.get9thBit())
+    //if(!params->get9thBit())
     //    newtio0.c_cflag = newtio0.c_cflag & (~PARENB) & (~PARODD);
 
     //tcdrain(_channelId);

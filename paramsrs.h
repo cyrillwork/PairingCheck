@@ -1,18 +1,17 @@
 #ifndef PARAMSRS_H
 #define PARAMSRS_H
 
+#include "iparams.h"
+
+#include <memory>
+#include <unordered_map>
+#include <iostream>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
-
-#include <string>
-#include <unordered_map>
-#include <iostream>
-
-using namespace std;
-
 
 enum class Parity
 {
@@ -23,29 +22,41 @@ enum class Parity
 
 enum ByteSize
 {
+    None = 0,
     _CS5 = CS5,
     _CS6 = CS6,
     _CS7 = CS7,
-    _CS8 = CS8
+    _CS8 = CS8,
 };
 
-class ParamsRS
+
+class ParamsRS232;
+using TypeParamsRS = ParamsRS232*;//std::unique_ptr<ParamsRS>;
+
+using std::string;
+
+class ParamsRS232: public IParams
 {
 public:
-    ParamsRS();
 
-    ParamsRS (ParamsRS &params);
+    ParamsRS232 (ParamsRS232 &params);
 
-    ParamsRS(string devPath, Parity parity, int speed, ByteSize byteSize);
+    ParamsRS232(string _devPath = "/dev/ttyS0", Parity _parity = Parity::None,
+                            int _speed = B9600, ByteSize _byteSize = ByteSize::_CS8);
 
-    string getDevPath() { return devPath; }
-    void setDevPath(string devPath) { this->devPath = devPath; }
+    const string getName() const override { return string("RS232"); }
+
+    TypeParam getType() const override { return TypeParam::RS232; }
 
     Parity getParity() { return parity; }
     void setParity(Parity parity) { this->parity = parity; }
 
     int getBaudRate() { return speed; }
-    void setBaudRate( string _speed );
+
+    std::string getBaudRateString();
+    std::string getByteSizeString();
+
+    void setBaudRate ( string _speed );
 
     ByteSize getByteSize() { return byteSize; }
     void setByteSize(ByteSize byteSize) { this->byteSize = byteSize; }
@@ -53,14 +64,16 @@ public:
     void set9thBit(bool _is9thbit) { this->Is9thbit = _is9thbit; }
     bool get9thBit() { return this->Is9thbit; }
 
+    virtual bool fromJSON(const rapidjson::Value &doc) override;
+
+    virtual void toJSON(rapidjson::Document &doc) override;
+
 private:
-    string devPath;
     Parity parity; // "None"
     int speed;
     ByteSize byteSize;
 
     bool Is9thbit = false;
-
     std::unordered_map <string, int> baudeRate =
     {
         { "50",  B50 },

@@ -3,57 +3,42 @@
 #include "workerrs.h"
 
 
-
-WorkerRS::WorkerRS(ParamsRS& _params):
-    isRun(true),
-    params(_params),
-    run_thread{&WorkerRS::run, this}
+Worker::Worker(TypeParams _params, TypeInterface interface):
+    params(_params)
 {
-    //this->devPath = params.getDevPath();
-    std::cout << "WorkerRS devPath=" << params.getDevPath() << std::endl;
-    interface();
+    //setup connection interface
+    setInterface(interface);
+
+    auto dev = getInterface()->getDevName();
+
+    std::cout << "Worker devPath=" << dev << std::endl;
+
+    if(!getInterface()->open())
+    {
+        throw WorkerEx("Error open dev=" + dev);
+    }
+
+    isRun = true;
+
+    run_thread = make_unique<std::thread>(&Worker::run, this);
 }
 
-WorkerRS::~WorkerRS()
+Worker::~Worker()
 {
     isRun = false;
-    this->run_thread.join();
+    run_thread->join();
+
+    getInterface()->close();
 }
 
-void WorkerRS::run_func()
-{
-    cout << "WorkerRS run_func" << endl;
-}
-
-void WorkerRS::run()
+void Worker::run()
 {
 
     while(isRun)
     {
         run_func();
-        std::this_thread::sleep_for(chrono::milliseconds(DELAY_MSEC));
+        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_MSEC));
     }
-}
-
-Interface *WorkerRS::interface()
-{
-    static Interface *instance = 0;
-
-    if(instance == 0)
-    {
-        instance = new Interface();
-        instance->createRSInterface(params);
-
-        if(!instance->isOpened())
-        {
-            isRun = false;
-            this->run_thread.join();
-
-            throw WorkerRSEx(string("Error open dev ") + params.getDevPath());
-        }
-    }
-
-    return instance;
 }
 
 
