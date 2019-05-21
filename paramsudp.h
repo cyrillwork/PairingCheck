@@ -18,7 +18,13 @@ public:
     virtual bool fromJSON(const rapidjson::Value &doc) override;
     virtual void toJSON(rapidjson::Document &doc) override;
 
+    uint16_t getPortUDP() const;
+    void setPortUDP(const uint16_t&value);
+    void setPortUDP(const char*value);
 
+private:
+
+    uint16_t portUDP;
 };
 
 #endif // UDPPARAMS_H

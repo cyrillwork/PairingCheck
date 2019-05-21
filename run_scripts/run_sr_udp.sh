@@ -1,4 +1,4 @@
 #!/bin/bash
 
-../PairingCheck --server --type UDP --devpath 127.0.0.1
+../PairingCheck --server --configfile ./config/udp_client.json
 
