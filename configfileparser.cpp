@@ -66,7 +66,9 @@ bool ConfigFileParser::generateJSON(TypeParam type)
         auto& allocator = doc.GetAllocator();
         doc.SetObject();
 
-        doc.AddMember("Type", "RS232", allocator);
+        rapidjson::Value val;
+        val.SetString(IParams::getStringType(type).c_str(), allocator);
+        doc.AddMember("Type", val, allocator);
 
         temp_params->toJSON(doc);
 

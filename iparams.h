@@ -54,6 +54,25 @@ public:
         return result;
     }
 
+    static std::string getStringType(TypeParam type)
+    {
+        std::string result;
+        switch (type)
+        {
+            case TypeParam::None:
+                result = "None";
+            break;
+            case TypeParam::RS232:
+                result = "RS232";
+            break;
+            case TypeParam::UDP:
+                result = "UDP";
+            break;
+        }
+
+        return std::string(result);
+    }
+
 protected:
     std::string devPath;
 };

@@ -29,7 +29,7 @@ bool UDPInterface::open()
         memset(&sock_addr, 0, sizeof(struct sockaddr_in));
 
         sock_addr.sin_family = AF_INET;
-        sock_addr.sin_port = htons(UDP_PORT);
+        sock_addr.sin_port = htons(params->getPortUDP());
         sock_addr.sin_addr.s_addr = inet_addr(params->getDevPath().c_str());
 
         result = 0;
