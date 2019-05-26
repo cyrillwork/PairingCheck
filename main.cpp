@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
 
     TypeParams params = nullptr;
 
-    //cout << "Hello, server " << Server::getFileName() << endl;
 
     if(argc < 3)
     {

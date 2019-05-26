@@ -31,7 +31,7 @@ bool RSInterface::open()
 
     isFirstByte = true;
 
-    _channelId = ::open(params->getDevPath().c_str(), O_RDWR | O_NONBLOCK /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
+    _channelId = ::open(params->getDevPath().c_str(), O_RDWR /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
 
     if (_channelId < 0)
     {
@@ -53,11 +53,11 @@ bool RSInterface::open()
         newtio0.c_iflag |= INPCK;
 
         newtio0.c_iflag |= PARMRK; // Mark all bytes received with 9th bit set by "ff 0"
-        newtio0.c_cflag |= CMSPAR;
+        //newtio0.c_cflag |= CMSPAR;
 
         newtio0.c_cflag &= ~PARODD;	// normal state - space parity
 
-        newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);
+        //newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);
         newtio0.c_cflag = CREAD | CLOCAL;
         newtio0.c_cflag |= PARENB;// | PARODD;
         newtio0.c_cflag &= ~CSTOPB;
@@ -78,7 +78,7 @@ bool RSInterface::open()
 
         // Set receive with space parity
         newtio0.c_cflag |= PARENB;
-        newtio0.c_cflag |= CMSPAR;
+        //newtio0.c_cflag |= CMSPAR;
         newtio0.c_cflag &= ~PARODD;
         tcsetattr(_channelId, TCSANOW, &newtio0);
 
@@ -119,7 +119,7 @@ int RSInterface::read(char *data, int size, int timeout)
     tv.tv_sec = (int)(timeout / 1000000);
     tv.tv_usec = timeout - tv.tv_sec*1000000;
 
-    resfds = select(_channelId + 1, &fds, NULL, NULL, &tv);
+    resfds = selectSerial(_channelId + 1, &fds, NULL, NULL, &tv);
     if(resfds <= 0)
     {
         //cout << "Read timeout" << endl;
@@ -212,7 +212,7 @@ int RSInterface::putCharWakeup(unsigned char symbol)
         //std::this_thread::sleep_for(chrono::milliseconds(100));
         // Set receive with space parity
         newtio0.c_cflag |= PARENB;
-        newtio0.c_cflag |= CMSPAR;
+        //newtio0.c_cflag |= CMSPAR;
         newtio0.c_cflag &= ~PARODD;
     }
 

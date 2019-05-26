@@ -5,7 +5,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <termios.h>
+
+#ifdef _WIN32
+    #include "termi_win/termios.h"
+#else
+    #include <termios.h>
+#endif
+
 #include <unistd.h>
 
 #include "rapidjson/document.h"

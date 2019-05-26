@@ -6,6 +6,12 @@
 UDPInterface::UDPInterface(TypeParams _params):
     IInterface(_params)
 {
+
+#ifdef _WIN32
+    WSADATA wsdata;
+    WSAStartup(0x0101,&wsdata);
+#endif
+
     params = dynamic_cast<TypeParamsUDP>(_params);
     if(params)
     {
@@ -47,13 +53,19 @@ bool UDPInterface::bind()
 
 bool UDPInterface::close()
 {
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
+
     return ::close(sockfd);
+
 }
 
 int UDPInterface::read(char *data, int size, int timeout)
 {
     if(check_sock(sockfd, timeout))
-        return recvfrom(sockfd, data, size, MSG_DONTWAIT, NULL, NULL);
+        return recvfrom(sockfd, data, size, /*MSG_DONTWAIT*/ 0, NULL, NULL);
     else
         return 0;
 }
