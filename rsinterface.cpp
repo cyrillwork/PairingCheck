@@ -119,7 +119,12 @@ int RSInterface::read(char *data, int size, int timeout)
     tv.tv_sec = (int)(timeout / 1000000);
     tv.tv_usec = timeout - tv.tv_sec*1000000;
 
+#ifdef _WIN32
     resfds = selectSerial(_channelId + 1, &fds, NULL, NULL, &tv);
+#else
+    resfds = select(_channelId + 1, &fds, NULL, NULL, &tv);
+#endif
+
     if(resfds <= 0)
     {
         //cout << "Read timeout" << endl;
