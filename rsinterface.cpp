@@ -8,6 +8,13 @@ RSInterface::RSInterface(TypeParams _params):
     IInterface(_params),
     _channelId(-1)
 {
+
+#ifdef _WIN32
+    serial = make_unique<WinSerial>();
+#else
+
+#endif
+
     params = dynamic_cast<TypeParamsRS>(_params);
     if(params)
     {
@@ -31,7 +38,7 @@ bool RSInterface::open()
 
     isFirstByte = true;
 
-    _channelId = ::open(params->getDevPath().c_str(), O_RDWR /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
+    _channelId = serial->open(params->getDevPath().c_str(), O_RDWR /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
 
     if (_channelId < 0)
     {
@@ -69,19 +76,21 @@ bool RSInterface::open()
         newtio0.c_cc[VMIN] = 0;
         newtio0.c_cc[VTIME]= 0;
 
-        cfsetospeed(&newtio0, params->getBaudRate() );
-        cfsetispeed(&newtio0, params->getBaudRate() );
+        //todo cfsetospeed(&newtio0, params->getBaudRate() );
+        //todo cfsetispeed(&newtio0, params->getBaudRate() );
 
-        tcflush (_channelId, TCIFLUSH);
-        tcsetattr (_channelId, TCSANOW, &newtio0);
+        //todo tcflush (_channelId, TCIFLUSH);
+        //tcsetattr(_channelId, TCSANOW, &newtio0);
+        serial->tcsetattr (_channelId, &newtio0);
 
 
         // Set receive with space parity
         newtio0.c_cflag |= PARENB;
         //newtio0.c_cflag |= CMSPAR;
         newtio0.c_cflag &= ~PARODD;
-        tcsetattr(_channelId, TCSANOW, &newtio0);
 
+        //tcsetattr(_channelId, TCSANOW, &newtio0);
+        serial->tcsetattr(_channelId, &newtio0);
     }
     else
     {
@@ -96,42 +105,37 @@ bool RSInterface::open()
         newtio0.c_cc[VTIME] = 0;    // inter-character timer unused
         newtio0.c_cc[VMIN]  = 1;    // blocking read until  chars received
 
-        tcflush (_channelId, TCIFLUSH);
-        tcsetattr (_channelId, TCSANOW, &newtio0);
+        //tcflush (_channelId, TCIFLUSH);
+        //tcsetattr (_channelId, TCSANOW, &newtio0);
+        serial->tcsetattr (_channelId, &newtio0);
     }
+
+    //cfmakeraw(&newtio0);
 
     return true;
 }
 
 bool RSInterface::close()
 {
-    return true;
+    return (serial->close(_channelId) == 0)?true:false;
 }
 
 int RSInterface::read(char *data, int size, int timeout)
 {
-    struct timeval tv;
-    fd_set fds;
-    int resfds;
 
-    FD_ZERO (&fds);
-    FD_SET (_channelId, &fds);
-    tv.tv_sec = (int)(timeout / 1000000);
-    tv.tv_usec = timeout - tv.tv_sec*1000000;
+    return serial->read(data, size);
 
-#ifdef _WIN32
-    resfds = selectSerial(_channelId + 1, &fds, NULL, NULL, &tv);
-#else
-    resfds = select(_channelId + 1, &fds, NULL, NULL, &tv);
-#endif
+    //LINUX
+//    struct timeval tv;
+//    fd_set fds;
+//    int resfds;
+//    FD_ZERO (&fds);
+//    FD_SET (_channelId, &fds);
+//    tv.tv_sec = (int)(timeout / 1000000);
+//    tv.tv_usec = timeout - tv.tv_sec*1000000;
+    //resfds = select(_channelId + 1, &fds, NULL, NULL, &tv);
+    //return (resfds <= 0) ? 0 : read(_channelId, data, size);
 
-    if(resfds <= 0)
-    {
-        //cout << "Read timeout" << endl;
-        return 0;
-    }
-
-    return ::read(_channelId, data, size);
 }
 
 int RSInterface::write(const char *data, int size)
@@ -144,24 +148,23 @@ int RSInterface::write(const char *data, int size)
         return -1;
     }
 
-    if(params->get9thBit() && isFirstByte)
-    {
-        isFirstByte = false;
+//    if(params->get9thBit() && isFirstByte)
+//    {
+//        isFirstByte = false;
 
-        if((res = putCharWakeup(data[0])) == -1)
-        {
-            return -1;
-        }
+//        if((res = putCharWakeup(data[0])) == -1)
+//        {
+//            return -1;
+//        }
 
-        offset = 1;
-        size--;
+//        offset = 1;
+//        size--;
 
-    }
+//    }
 
-   res += ::write(_channelId, data + offset, size);
+    res += serial->write(data + offset, size);
 
-   return res;
-
+    return res;
 }
 
 /******************************************************************************
@@ -175,54 +178,54 @@ int RSInterface::write(const char *data, int size)
 ******************************************************************************/
 int RSInterface::putCharWakeup(unsigned char symbol)
 {
-    int				i, rc;
-    unsigned char	tmp, nine;
+    int				i, rc=0;
+//    unsigned char	tmp, nine;
 
-    tmp  = symbol;
-    nine = 0;
+//    tmp  = symbol;
+//    nine = 0;
 
-    std::cout << "SRL_PutCharWakeup symbol = " << (int)symbol << std::endl;
+//    std::cout << "SRL_PutCharWakeup symbol = " << (int)symbol << std::endl;
 
-    for(i=0;i<8;i++)
-    {
-        nine ^= (tmp & 0x01);
-        tmp = tmp >> 1;
-    }
+//    for(i=0;i<8;i++)
+//    {
+//        nine ^= (tmp & 0x01);
+//        tmp = tmp >> 1;
+//    }
 
-    if (nine)//(false)//(nine)
-    {
-        std::cout << "set 9 bit" << std::endl;
-        newtio0.c_cflag = (newtio0.c_cflag | PARENB) & (~PARODD);
-    }
-    else
-    {
-        std::cout << "not set 9 bit" << std::endl;
-        newtio0.c_cflag =  newtio0.c_cflag | PARENB | PARODD;
-    }
+//    if (nine)//(false)//(nine)
+//    {
+//        std::cout << "set 9 bit" << std::endl;
+//        newtio0.c_cflag = (newtio0.c_cflag | PARENB) & (~PARODD);
+//    }
+//    else
+//    {
+//        std::cout << "not set 9 bit" << std::endl;
+//        newtio0.c_cflag =  newtio0.c_cflag | PARENB | PARODD;
+//    }
 
-    tcdrain(_channelId);
+//    tcdrain(_channelId);
 
-    if (tcsetattr(_channelId, TCSADRAIN , &newtio0) == -1)
-        return -1;
+//    if (tcsetattr(_channelId, TCSADRAIN , &newtio0) == -1)
+//        return -1;
 
-    rc = ::write(_channelId, &symbol, 1);
+//    rc = ::write(_channelId, &symbol, 1);
 
 
-    //if(!params->get9thBit())
-    //    newtio0.c_cflag = newtio0.c_cflag & (~PARENB) & (~PARODD);
+//    //if(!params->get9thBit())
+//    //    newtio0.c_cflag = newtio0.c_cflag & (~PARENB) & (~PARODD);
 
-    //tcdrain(_channelId);
+//    //tcdrain(_channelId);
 
-    {
-        //std::this_thread::sleep_for(chrono::milliseconds(100));
-        // Set receive with space parity
-        newtio0.c_cflag |= PARENB;
-        //newtio0.c_cflag |= CMSPAR;
-        newtio0.c_cflag &= ~PARODD;
-    }
+//    {
+//        //std::this_thread::sleep_for(chrono::milliseconds(100));
+//        // Set receive with space parity
+//        newtio0.c_cflag |= PARENB;
+//        //newtio0.c_cflag |= CMSPAR;
+//        newtio0.c_cflag &= ~PARODD;
+//    }
 
-    //tcsetattr(_channelId, TCSADRAIN, &newtio0);
-    tcsetattr (_channelId, TCSANOW, &newtio0);
+//    //tcsetattr(_channelId, TCSADRAIN, &newtio0);
+//    tcsetattr (_channelId, TCSANOW, &newtio0);
 
 
     return rc;

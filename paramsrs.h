@@ -10,14 +10,17 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #ifdef _WIN32
-    #include "termi_win/termios.h"
+    //#include "termi_win/termios.h"
+    #include "serial/win_serial.h"
+    using namespace win_serial;
 #else
     #include <termios.h>
 #endif
 
-#include <unistd.h>
+
 
 enum class Parity
 {

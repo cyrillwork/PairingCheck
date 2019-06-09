@@ -12,17 +12,21 @@ Client::Client(TypeParams _params, TypeInterface interface, string fileName):
 
 Client::~Client()
 {
+    //std::cout << "Close client " << std::endl;
     fileStream.close();
+    //std::cout << "~Client " << std::endl;
 }
 
 void Client::run_func()
 {
-    static int count_send = 0;
+    if(!isOpened)
+    {
+        return;
+    }
 
     char buff[BUFF_SIZE];
     fileStream.read(buff, BUFF_SIZE);
     int res = fileStream.gcount();
-
     if(res > 0)
     {
         int res_send = getInterface()->write(buff, res);
@@ -31,7 +35,8 @@ void Client::run_func()
     }
     else
     {
-        std::cout << "All data send "<< count_send <<", prees Enter" << std::endl;
+        std::cout << "All data send "<< count_send <<", file size " << file_size << std::endl;
+        std::cout << "press Enter..." << std::endl;
         isRun = false;
     }
 }
@@ -40,10 +45,17 @@ void Client::openFile()
 {
     fileStream.open(fileName, std::ios::binary);
 
-    if(!fileStream)
+    if(!fileStream.is_open())
     {
         isRun = false;
         throw WorkerEx("File do not opened " + fileName);
     }
+
+    // get length of file:
+    fileStream.seekg (0, fileStream.end);
+    file_size = fileStream.tellg();
+    fileStream.seekg (0, fileStream.beg);
+    //std::cout << "file_size=" << file_size << std::endl;
+    isOpened = true;
 }
 

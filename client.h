@@ -13,8 +13,8 @@
 class Client: public Worker
 {
 public:
-    Client(TypeParams _params, TypeInterface interface, string fileName);
-    ~Client();
+    Client(TypeParams _params, TypeInterface interface, std::string fileName);
+    ~Client() override;
 
 protected:
     void run_func() override;
@@ -22,8 +22,13 @@ protected:
 private:
     void openFile();
 
+    std::streampos  count_send = 0;
+    std::streampos  file_size = 0;
+
     std::ifstream fileStream;
     string fileName;
+
+    bool isOpened = false;
 };
 
 #endif // CLIENT_H

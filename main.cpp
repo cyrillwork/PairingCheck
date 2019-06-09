@@ -19,8 +19,8 @@ enum
 void printErrorMessage()
 {
     cout << "Error. Usage: " << endl;
-    cout << "Server mode: PairingCheck --server --configfile.json " << endl;
-    cout << "Client mode: PairingCheck --client filename --config configfile.json" << endl;
+    cout << "Server mode: PairingCheck --server --config filename.json " << endl;
+    cout << "Client mode: PairingCheck --client filename --config filename.json" << endl;
     cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;
 
     cout << "For generate config file: " << endl;
@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
 
     TypeParams params = nullptr;
 
-
     if(argc < 3)
     {
         printErrorMessage();
@@ -69,14 +68,14 @@ int main(int argc, char *argv[])
     {
         static struct option long_options[] =
         {
-        {"client",      required_argument,      0,  'c'},
-        {"server",      no_argument,            0,  's'},
-        {"configfile",  required_argument,      0,  'f'},
-        {"devpath",     required_argument,      0,  'd'},
-        {"type",        required_argument,      0,  't'},
-        {"speed",       required_argument,      0,  'b'},
-        {"generate",    required_argument,      0,  'g'},
-        {"wakeupbit",   no_argument,            0,  'w'},
+        {"client",      required_argument,      nullptr,  'c'},
+        {"server",      no_argument,            nullptr,  's'},
+        {"config",      required_argument,      nullptr,  'f'},
+        {"devpath",     required_argument,      nullptr,  'd'},
+        {"type",        required_argument,      nullptr,  't'},
+        {"speed",       required_argument,      nullptr,  'b'},
+        {"generate",    required_argument,      nullptr,  'g'},
+        {"wakeupbit",   no_argument,            nullptr,  'w'},
 
     };
 
@@ -87,7 +86,8 @@ int main(int argc, char *argv[])
             int c;
             int option_index = 0;
 
-            c = getopt_long(argc, argv, optString, long_options, &option_index);
+            c = getopt_long_only(argc, argv, optString, long_options, &option_index);
+
 
             if(c == -1)
             {
@@ -98,12 +98,10 @@ int main(int argc, char *argv[])
             {
                 case 's':
                     Mode = SERVER;
-                    //printf("set option show time\n");
                 break;
 
                 case 'c':
                     Mode = CLIENT;
-                    //printf("set option link as file\n");
                     fileName = optarg;
                 break;
 
@@ -135,7 +133,6 @@ int main(int argc, char *argv[])
                     }
                     exit(0);
                 }
-                break;
 
                 case '?':
                 {
@@ -171,7 +168,6 @@ int main(int argc, char *argv[])
                     cout << "params->getDevPath() = " << params->getDevPath() << endl;
 
                     Client client(params, interface, fileName);
-
                     getchar();
                 }
                 catch (Worker::WorkerEx ex)
@@ -187,9 +183,6 @@ int main(int argc, char *argv[])
                     cout << "create server" << endl;
                     cout << "params->getDevPath() = " << params->getDevPath() << endl;
                     Server server(params, interface);
-
-                    //Server server(argv[optind]);
-
                     getchar();
                 }
                 catch (Worker::WorkerEx ex)

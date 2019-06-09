@@ -20,7 +20,7 @@ SOURCES += main.cpp \
     rsinterface.cpp \
     udpinterface.cpp \
     paramsudp.cpp \
-    termi_win/termios.cpp \
+    serial/winserial.cpp \
     configfileparser.cpp
 
 
@@ -37,7 +37,9 @@ HEADERS += \
     iinterface.h \
     udpinterface.h \
     paramsudp.h \
-    termi_win/termios.h \
+    serial/iserial.h \
+    serial/winserial.h \
+    serial/win_serial.h \
     configfileparser.h
 
 LIBS += -lwsock32

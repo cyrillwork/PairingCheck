@@ -21,13 +21,14 @@ Server::Server(TypeParams _params, TypeInterface interface):
 string Server::getFileName()
 {
     char buff[128];
-    time_t t = time(0);   // get time now
+    time_t t = time(nullptr);   // get time now
 
+    buff[0] = 0x0;
     countFiles++;
 
-    strftime(buff, 128, "%F_%X.hex", localtime( &t ));
+    strftime(buff, 128, "%X", localtime( &t ));
 
-    return string(buff) + "_" + std::to_string(countFiles);
+    return string(buff) + "_" + std::to_string(countFiles) + ".hex";
 }
 
 void Server::run_func()
@@ -36,7 +37,7 @@ void Server::run_func()
 
     int res = getInterface()->read(buff, BUFF_SIZE, DELAY_MSEC*1000);
 
-    //cout << "server get res="<< res << endl;
+    cout << "server get res="<< res << endl;
 
     if(res > 0)
     {

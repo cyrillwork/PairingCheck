@@ -7,7 +7,8 @@
 #include <fcntl.h>
 
 #ifdef _WIN32
-    #include "termi_win/termios.h"
+    //#include "termi_win/termios.h"
+    #include "serial/win_serial.h"
 #else
     #include <termios.h>
 #endif

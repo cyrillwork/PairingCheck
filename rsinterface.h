@@ -7,10 +7,16 @@
 #include <map>
 #include <cstring>
 
+#include "serial/iserial.h"
 
 #include "const.h"
 #include "iinterface.h"
 #include "paramsrs.h"
+
+#ifdef _WIN32
+    #include "serial/winserial.h"
+    using namespace win_serial;
+#endif
 
 class RSInterface : public IInterface
 {
@@ -32,13 +38,13 @@ public:
     int putCharWakeup(unsigned char symbol);
 
 private:
-    //ParamsRS params;
-
     bool isFirstByte = false;
+    int _channelId;
 
-    int _channelId;   
-    struct termios newtio0;
+    termios newtio0;
     TypeParamsRS params;
+
+    std::unique_ptr<ISerial> serial;
 };
 
 #endif // RS_INTERFACE_H

@@ -20,7 +20,8 @@ SOURCES += main.cpp \
     rsinterface.cpp \
     udpinterface.cpp \
     paramsudp.cpp \
-    configfileparser.cpp
+    configfileparser.cpp \
+    serial/winserial.cpp
 
 
 HEADERS += \
@@ -36,5 +37,8 @@ HEADERS += \
     iinterface.h \
     udpinterface.h \
     paramsudp.h \
-    configfileparser.h
+    configfileparser.h \
+    serial/win_serial.h \
+    serial/winserial.h \
+    serial/iserial.h
 
