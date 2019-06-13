@@ -12,7 +12,7 @@ RSInterface::RSInterface(TypeParams _params):
 #ifdef _WIN32
     serial = make_unique<WinSerial>();
 #else
-
+    serial = make_unique<LinuxSerial>();
 #endif
 
     params = dynamic_cast<TypeParamsRS>(_params);
@@ -117,7 +117,7 @@ bool RSInterface::open()
 
 bool RSInterface::close()
 {
-    return (serial->close(_channelId) == 0)?true:false;
+    return (serial->close() == 0)?true:false;
 }
 
 int RSInterface::read(char *data, int size, int timeout)
