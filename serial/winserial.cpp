@@ -296,6 +296,9 @@ int getControlOptions(tcflag_t flag)
 int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
 {
     int ret = 0;
+
+    ::memcpy(&(this->termios_p), termios_p, sizeof(termios));
+
     //Store flags into local variables
     tcflag_t iflag = termios_p->c_iflag;
     tcflag_t lflag = termios_p->c_lflag;
@@ -437,13 +440,13 @@ int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
         return -1;
 }
 
-int WinSerial::cfsetispeed(termios *termios_p, speed_t speed)
+int WinSerial::cfsetispeed(speed_t speed)
 {
     ComDCM.BaudRate = static_cast<DWORD>(speed);
     return 0;
 }
 
-int WinSerial::cfsetospeed(termios *termios_p, speed_t speed)
+int WinSerial::cfsetospeed(speed_t speed)
 {
     ComDCM.BaudRate = static_cast<DWORD>(speed);
     return 0;

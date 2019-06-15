@@ -24,8 +24,8 @@ public:
     virtual int select(size_t timeout) override;
 
     virtual int tcsetattr(int optional_actions, const termios* termios_p) override;
-    virtual int cfsetispeed(termios* termios_p,speed_t speed) override;
-    virtual int cfsetospeed(termios* termios_p, speed_t speed) override;
+    virtual int cfsetispeed(speed_t speed) override;
+    virtual int cfsetospeed(speed_t speed) override;
 
 private:
     HANDLE m_Handle;
