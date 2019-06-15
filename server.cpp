@@ -2,6 +2,7 @@
 
 #include <ctime>
 #include <fstream>
+#include <algorithm>
 
 #include "server.h"
 
@@ -35,9 +36,9 @@ void Server::run_func()
 {
     char buff[BUFF_SIZE];
 
-    int res = getInterface()->read(buff, BUFF_SIZE, DELAY_MSEC*1000);
+    int res = getInterface()->read(buff, BUFF_SIZE, DELAY_MSEC);
 
-    cout << "server get res="<< res << endl;
+    //cout << "server get res="<< res << endl;
 
     if(res > 0)
     {
@@ -58,10 +59,19 @@ void Server::run_func()
         {
             //Write data to file
             string fileName = getFileName();
-            ofstream file(fileName, ios::binary|ios::trunc);
-            file.write(ArrayData.data(), ArrayData.size());
+            std::replace(fileName.begin(), fileName.end(), ':', '_');
+            ofstream file(fileName);
+            if(file.is_open())
+            {
+                file.write(ArrayData.data(), static_cast<int>(ArrayData.size()));
+                cout << "Write file " << fileName << endl;
+            }
+            else
+            {
+                cout << "!!! Error open file " << fileName << endl;
+            }
             file.close();
-            cout << "Write file " << fileName << endl;
+
 
             //Clear some data
             isGetData = false;

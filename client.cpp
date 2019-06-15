@@ -27,10 +27,14 @@ void Client::run_func()
     char buff[BUFF_SIZE];
     fileStream.read(buff, BUFF_SIZE);
     int res = fileStream.gcount();
+
+    //std::cout << "slice bytes res=" <<res << std::endl;
+
     if(res > 0)
     {
         int res_send = getInterface()->write(buff, res);
         count_send += res_send;
+
         std::cout << "Send " << count_send << " bytes" << std::endl;
     }
     else
@@ -55,6 +59,7 @@ void Client::openFile()
     fileStream.seekg (0, fileStream.end);
     file_size = fileStream.tellg();
     fileStream.seekg (0, fileStream.beg);
+
     //std::cout << "file_size=" << file_size << std::endl;
     isOpened = true;
 }

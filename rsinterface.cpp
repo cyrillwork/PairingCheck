@@ -34,8 +34,7 @@ RSInterface::~RSInterface()
 bool RSInterface::open()
 {
     std::cout << "RSInterface::open() " << params->getDevPath() << std::endl;
-    std::cout << "params->get9thBit() " << params->get9thBit() << std::endl;
-
+    //std::cout << "params->get9thBit() " << params->get9thBit() << std::endl;
     isFirstByte = true;
 
     _channelId = serial->open(params->getDevPath().c_str(), O_RDWR /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
@@ -76,8 +75,8 @@ bool RSInterface::open()
         newtio0.c_cc[VMIN] = 0;
         newtio0.c_cc[VTIME]= 0;
 
-        //todo cfsetospeed(&newtio0, params->getBaudRate() );
-        //todo cfsetispeed(&newtio0, params->getBaudRate() );
+        serial->cfsetospeed(&newtio0, params->getBaudRate() );
+        serial->cfsetispeed(&newtio0, params->getBaudRate() );
 
         //todo tcflush (_channelId, TCIFLUSH);
         //tcsetattr(_channelId, TCSANOW, &newtio0);
@@ -94,7 +93,7 @@ bool RSInterface::open()
     }
     else
     {
-        newtio0.c_cflag = params->getBaudRate() | params->getByteSize() | CLOCAL | CREAD | (int)params->getParity();
+        newtio0.c_cflag = params->getByteSize() | CLOCAL | CREAD | (int)params->getParity();
 
         newtio0.c_cflag &= ~CRTSCTS;
         newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
@@ -102,15 +101,14 @@ bool RSInterface::open()
 
         newtio0.c_oflag = 0;
         newtio0.c_lflag = 0;
-        newtio0.c_cc[VTIME] = 0;    // inter-character timer unused
-        newtio0.c_cc[VMIN]  = 1;    // blocking read until  chars received
+        newtio0.c_cc[VTIME] = 10;    // inter-character timer unused
+        newtio0.c_cc[VMIN]  = 0;    // blocking read until  chars received
 
-        //tcflush (_channelId, TCIFLUSH);
-        //tcsetattr (_channelId, TCSANOW, &newtio0);
+        serial->cfsetospeed(&newtio0, params->getBaudRate() );
+        serial->cfsetispeed(&newtio0, params->getBaudRate() );
+
         serial->tcsetattr (_channelId, &newtio0);
     }
-
-    //cfmakeraw(&newtio0);
 
     return true;
 }
@@ -122,20 +120,12 @@ bool RSInterface::close()
 
 int RSInterface::read(char *data, int size, int timeout)
 {
+    if(serial->select(static_cast<size_t>(timeout)) > 0)
+    {
+        return static_cast<int>(serial->read(data, static_cast<size_t>(size)));
+    }
 
-    return serial->read(data, size);
-
-    //LINUX
-//    struct timeval tv;
-//    fd_set fds;
-//    int resfds;
-//    FD_ZERO (&fds);
-//    FD_SET (_channelId, &fds);
-//    tv.tv_sec = (int)(timeout / 1000000);
-//    tv.tv_usec = timeout - tv.tv_sec*1000000;
-    //resfds = select(_channelId + 1, &fds, NULL, NULL, &tv);
-    //return (resfds <= 0) ? 0 : read(_channelId, data, size);
-
+    return 0;
 }
 
 int RSInterface::write(const char *data, int size)
@@ -163,6 +153,8 @@ int RSInterface::write(const char *data, int size)
 //    }
 
     res += serial->write(data + offset, size);
+
+    //std::cout << "write res=" << res << std::endl;
 
     return res;
 }

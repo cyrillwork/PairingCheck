@@ -24,7 +24,9 @@ public:
     virtual size_t read(char* buff, size_t len) = 0;
     virtual size_t write(const char* buff, size_t len) = 0;
     virtual int tcsetattr(int optional_actions, const termios* termios_p) = 0;
-
+    virtual int cfsetispeed(termios* termios_p,speed_t speed) = 0;
+    virtual int cfsetospeed(termios* termios_p, speed_t speed) = 0;
+    /** timeout milliseconds */
     virtual int select(size_t timeout) = 0;
 
 protected:

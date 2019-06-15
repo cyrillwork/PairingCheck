@@ -60,7 +60,7 @@ public:
     Parity getParity() { return parity; }
     void setParity(Parity parity) { this->parity = parity; }
 
-    int getBaudRate() { return speed; }
+    speed_t getBaudRate() { return static_cast<speed_t>(speed); }
 
     std::string getBaudRateString();
     std::string getByteSizeString();

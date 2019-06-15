@@ -9,7 +9,7 @@ WinSerial::WinSerial():
 
 WinSerial::~WinSerial()
 {
-    close(fd);
+    close();
 }
 
 bool WinSerial::IsOK() const
@@ -26,8 +26,7 @@ int WinSerial::open(const char *pathname, int flags)
     std::wstring str1(port.begin(), port.end());
 
     m_Handle =
-            CreateFile(
-                str1.c_str(),
+            CreateFile( str1.c_str(),
                 GENERIC_READ | GENERIC_WRITE,
                 0,
                 nullptr,
@@ -37,6 +36,7 @@ int WinSerial::open(const char *pathname, int flags)
 
     if(m_Handle == INVALID_HANDLE_VALUE)
     {
+        std::cout << "!!! Invalid open port" << std::endl;
         return -1;
     }
 
@@ -57,7 +57,7 @@ int WinSerial::open(const char *pathname, int flags)
         return -1;
     }
 
-    DCB ComDCM;
+    //DCB ComDCM;
 
     memset(&ComDCM,0,sizeof(ComDCM));
     ComDCM.DCBlength = sizeof(DCB);
@@ -92,7 +92,7 @@ int WinSerial::open(const char *pathname, int flags)
     return fd;
 }
 
-int WinSerial::close(int fd)
+int WinSerial::close()
 {
     if(m_Handle != INVALID_HANDLE_VALUE)
     {
@@ -101,16 +101,26 @@ int WinSerial::close(int fd)
     }
 }
 
-int WinSerial::select(int nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptfds, struct timeval* timeout)
+int WinSerial::select(size_t timeout)
 {
-    SetCommMask(m_Handle, EV_RXCHAR);
-    DWORD dwEventMask;
-    WaitCommEvent(m_Handle, &dwEventMask, nullptr);
+//    SetCommMask(m_Handle, EV_RXCHAR);
+//    DWORD dwEventMask;
+//    WaitCommEvent(m_Handle, &dwEventMask, nullptr);
 
-    if (dwEventMask == EV_RXCHAR)
-        return fd;
-    else
+//    if (dwEventMask == EV_RXCHAR)
+//        return fd;
+//    else
+//        return -1;
+
+    if(WaitForSingleObject(m_Handle, ((timeout == 0) ? INFINITE : timeout) ) == WAIT_TIMEOUT)
+    {
         return -1;
+    }
+    else
+    {
+        return fd;
+    }
+
 }
 
 
@@ -148,25 +158,6 @@ size_t WinSerial::read(char *buff, size_t len)
 
     return feedback;
 
-//    unsigned char* buf = &data[0];
-//    DWORD len = (DWORD)data.size();
-
-//    int attempts = 3;
-//    while(len && (attempts || (GetTickCount()-begin) < (DWORD)TIMEOUT/3)) {
-
-//        if(attempts) attempts--;
-
-//        if(!ReadFile(m_Handle, buf, len, &feedback, NULL)) {
-//            CloseHandle(m_Handle);
-//            m_Handle = INVALID_HANDLE_VALUE;
-//            throw TTYException();
-//        }
-
-//        assert(feedback <= len);
-//        len -= feedback;
-//        buf += feedback;
-
-//    }
 
 }
 
@@ -305,13 +296,13 @@ int getControlOptions(tcflag_t flag)
 int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
 {
     int ret = 0;
-
     //Store flags into local variables
     tcflag_t iflag = termios_p->c_iflag;
     tcflag_t lflag = termios_p->c_lflag;
     tcflag_t cflag = termios_p->c_cflag;
-    tcflag_t oflag = termios_p->c_oflag;
+    //tcflag_t oflag = termios_p->c_oflag;
 
+    //std::cout << "speed=" <<(int)speed << std::endl;
     /*****************************************
     iflag
     *****************************************/
@@ -320,9 +311,9 @@ int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
 
     if ((IX == i_IXOFF_IXON) || (IX == i_PARMRK_IXON_IXOFF)) {
 
-        SerialParams.fOutX = TRUE;
-        SerialParams.fInX = TRUE;
-        SerialParams.fTXContinueOnXoff = TRUE;
+        ComDCM.fOutX = TRUE;
+        ComDCM.fInX = TRUE;
+        ComDCM.fTXContinueOnXoff = TRUE;
     }
 
     /*****************************************
@@ -342,50 +333,58 @@ int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
     int CharSet = getCharSet(cflag);
     int c_opt = getControlOptions(cflag);
 
-    switch (CharSet) {
 
+
+    switch (CharSet)
+    {
     case CS5:
-        SerialParams.ByteSize = 5;
+        //std::cout << "!!!!!!!! CS5" << std::endl;
+        ComDCM.ByteSize = 5;
         break;
 
     case CS6:
-        SerialParams.ByteSize = 6;
+        //std::cout << "!!!!!!!! CS6" << std::endl;
+        ComDCM.ByteSize = 6;
         break;
 
     case CS7:
-        SerialParams.ByteSize = 7;
+        //std::cout << "!!!!!!!! CS7" << std::endl;
+        ComDCM.ByteSize = 7;
         break;
 
     case CS8:
-        SerialParams.ByteSize = 8;
+        //std::cout << "!!!!!!!! CS8" << std::endl;
+        ComDCM.ByteSize = 8;
         break;
     }
+
+    //std::cout << "!!!!!!!! ByteSize=" << (int)ComDCM.ByteSize << std::endl;
 
     switch (c_opt)
     {
     case c_ALL_ENABLED:
-        SerialParams.Parity = ODDPARITY;
-        SerialParams.StopBits = TWOSTOPBITS;
+        ComDCM.Parity = ODDPARITY;
+        ComDCM.StopBits = TWOSTOPBITS;
         break;
     case c_ALL_DISABLED:
-        SerialParams.Parity = NOPARITY;
-        SerialParams.StopBits = ONESTOPBIT;
+        ComDCM.Parity = NOPARITY;
+        ComDCM.StopBits = ONESTOPBIT;
         break;
     case c_PAREVEN_CSTOPB:
-        SerialParams.Parity = EVENPARITY;
-        SerialParams.StopBits = TWOSTOPBITS;
+        ComDCM.Parity = EVENPARITY;
+        ComDCM.StopBits = TWOSTOPBITS;
         break;
     case c_PAREVEN_NOCSTOPB:
-        SerialParams.Parity = EVENPARITY;
-        SerialParams.StopBits = ONESTOPBIT;
+        ComDCM.Parity = EVENPARITY;
+        ComDCM.StopBits = ONESTOPBIT;
         break;
     case c_PARODD_NOCSTOPB:
-        SerialParams.Parity = ODDPARITY;
-        SerialParams.StopBits = ONESTOPBIT;
+        ComDCM.Parity = ODDPARITY;
+        ComDCM.StopBits = ONESTOPBIT;
         break;
     case c_NOPARENB_CSTOPB:
-        SerialParams.Parity = NOPARITY;
-        SerialParams.StopBits = TWOSTOPBITS;
+        ComDCM.Parity = NOPARITY;
+        ComDCM.StopBits = TWOSTOPBITS;
         break;
     }
 
@@ -404,8 +403,8 @@ int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
 
     COMMTIMEOUTS timeouts = {};
 
-    if (termios_p->c_cc[VEOF] != 0) SerialParams.EofChar = (char)termios_p->c_cc[VEOF];
-    if (termios_p->c_cc[VINTR] != 0) SerialParams.EvtChar = (char)termios_p->c_cc[VINTR];
+    if (termios_p->c_cc[VEOF] != 0) ComDCM.EofChar = (char)termios_p->c_cc[VEOF];
+    if (termios_p->c_cc[VINTR] != 0) ComDCM.EvtChar = (char)termios_p->c_cc[VINTR];
 
     if (termios_p->c_cc[VMIN] == 1)
     { //Blocking
@@ -418,11 +417,11 @@ int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
     else
     { //Non blocking
 
-        timeouts.ReadIntervalTimeout = termios_p->c_cc[VTIME] * 100;         // in milliseconds
-        timeouts.ReadTotalTimeoutConstant = termios_p->c_cc[VTIME] * 100;    // in milliseconds
-        timeouts.ReadTotalTimeoutMultiplier = termios_p->c_cc[VTIME] * 100;  // in milliseconds
-        timeouts.WriteTotalTimeoutConstant = termios_p->c_cc[VTIME] * 100;   // in milliseconds
-        timeouts.WriteTotalTimeoutMultiplier = termios_p->c_cc[VTIME] * 100; // in milliseconds
+        timeouts.ReadIntervalTimeout = termios_p->c_cc[VTIME];         // in milliseconds
+        timeouts.ReadTotalTimeoutConstant = termios_p->c_cc[VTIME];    // in milliseconds
+        timeouts.ReadTotalTimeoutMultiplier = termios_p->c_cc[VTIME];  // in milliseconds
+        timeouts.WriteTotalTimeoutConstant = termios_p->c_cc[VTIME];   // in milliseconds
+        timeouts.WriteTotalTimeoutMultiplier = termios_p->c_cc[VTIME]; // in milliseconds
     }
 
     SetCommTimeouts(m_Handle, &timeouts);
@@ -430,10 +429,22 @@ int WinSerial::tcsetattr(int optional_actions, const termios* termios_p)
     /*****************************************
     EOF
     *****************************************/
-    ret = SetCommState(m_Handle, &SerialParams);
+    ret = SetCommState(m_Handle, &ComDCM);
 
     if (ret != 0)
         return 0;
     else
         return -1;
+}
+
+int WinSerial::cfsetispeed(termios *termios_p, speed_t speed)
+{
+    ComDCM.BaudRate = static_cast<DWORD>(speed);
+    return 0;
+}
+
+int WinSerial::cfsetospeed(termios *termios_p, speed_t speed)
+{
+    ComDCM.BaudRate = static_cast<DWORD>(speed);
+    return 0;
 }
