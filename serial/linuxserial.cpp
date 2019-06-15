@@ -53,7 +53,19 @@ int LinuxSerial::select(size_t timeout)
     return (resfds <= 0) ? 0 : 1;
 }
 
-int LinuxSerial::tcsetattr(int optional_actions, const termios*termios_p)
+int LinuxSerial::tcsetattr(int optional_actions, const termios* termios_p)
 {
+    ::memcpy(&(this->termios_p), termios_p, sizeof(termios));
 
+    return ::tcsetattr(fd, optional_actions, &(this->termios_p));
+}
+
+int LinuxSerial::cfsetispeed(speed_t speed)
+{
+    return ::cfsetispeed(&termios_p, speed);
+}
+
+int LinuxSerial::cfsetospeed(speed_t speed)
+{
+    return ::cfsetospeed(&termios_p, speed);
 }

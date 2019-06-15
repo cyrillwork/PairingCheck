@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../PairingCheck --server --configfile ./config/rs232_server.json
+../PairingCheck --server --config ./config/rs232_server.json

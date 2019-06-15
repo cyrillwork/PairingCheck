@@ -75,8 +75,8 @@ bool RSInterface::open()
         newtio0.c_cc[VMIN] = 0;
         newtio0.c_cc[VTIME]= 0;
 
-        serial->cfsetospeed(&newtio0, params->getBaudRate() );
-        serial->cfsetispeed(&newtio0, params->getBaudRate() );
+        serial->cfsetospeed( params->getBaudRate() );
+        serial->cfsetispeed( params->getBaudRate() );
 
         //todo tcflush (_channelId, TCIFLUSH);
         //tcsetattr(_channelId, TCSANOW, &newtio0);
@@ -104,8 +104,8 @@ bool RSInterface::open()
         newtio0.c_cc[VTIME] = 10;    // inter-character timer unused
         newtio0.c_cc[VMIN]  = 0;    // blocking read until  chars received
 
-        serial->cfsetospeed(&newtio0, params->getBaudRate() );
-        serial->cfsetispeed(&newtio0, params->getBaudRate() );
+        serial->cfsetospeed( params->getBaudRate() );
+        serial->cfsetispeed( params->getBaudRate() );
 
         serial->tcsetattr (_channelId, &newtio0);
     }

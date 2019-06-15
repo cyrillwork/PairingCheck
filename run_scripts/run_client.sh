@@ -1,4 +1,4 @@
 #!/bin/bash
 
-../PairingCheck --client ../test.txt --configfile ./config/rs232_client.json
+../PairingCheck --client ../test.txt --config ./config/rs232_client.json
 
