@@ -12,12 +12,13 @@
 #include "iinterface.h"
 #include "paramsrs.h"
 
-//#ifdef _WIN32
-//    #include "serial/winserial.h"
-//    using namespace win_serial;
-//#endif
-
+#ifdef _WIN32
+    #include "serial/winserial.h"
+    using namespace win_serial;
+#else
     #include "serial/linuxserial.h"
+#endif
+
 
 class RSInterface : public IInterface
 {

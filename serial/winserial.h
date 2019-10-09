@@ -16,20 +16,22 @@ public:
     bool IsOK() const;
 
     virtual int open(const char *pathname, int flags) override;
-    virtual int close(int fd) override;
+    virtual int close() override;
 
     virtual size_t read(char* buff, size_t len) override;
     virtual size_t write(const char* buff, size_t len) override;
 
-    virtual int select(int nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptfds, struct timeval* timeout) override;
+    virtual int select(size_t timeout) override;
 
     virtual int tcsetattr(int optional_actions, const termios* termios_p) override;
+    virtual int cfsetispeed(speed_t speed) override;
+    virtual int cfsetospeed(speed_t speed) override;
 
 private:
     HANDLE m_Handle;
-    int TIMEOUT = 1000;
+    unsigned long TIMEOUT = 1000;
 
-    DCB SerialParams = {}; //Initializing DCB structure
+    DCB ComDCM = {}; //Initializing DCB structure
 };
 
 }

@@ -25,12 +25,9 @@ int LinuxSerial::close()
     return (fd > 0) ? (::close(fd)) : 0;
 }
 
-size_t LinuxSerial::read(char* buff, size_t len, size_t timeout)
-{
-	if(this->select(timeout * 1000))
-		return ::read(fd, buff, len);
-	else
-		return 0;
+size_t LinuxSerial::read(char* buff, size_t len)
+{	
+    return ::read(fd, buff, len);
 }
 
 size_t LinuxSerial::write(const char*buff, size_t len)
@@ -54,7 +51,19 @@ int LinuxSerial::select(size_t timeout)
     return (resfds <= 0) ? 0 : 1;
 }
 
-int LinuxSerial::tcsetattr(int /*optional_actions*/, const termios*/*termios_p*/)
+int LinuxSerial::tcsetattr(int optional_actions, const termios* termios_p)
 {
+    ::memcpy(&(this->termios_p), termios_p, sizeof(termios));
 
+    return ::tcsetattr(fd, optional_actions, &(this->termios_p));
+}
+
+int LinuxSerial::cfsetispeed(speed_t speed)
+{
+    return ::cfsetispeed(&termios_p, speed);
+}
+
+int LinuxSerial::cfsetospeed(speed_t speed)
+{
+    return ::cfsetospeed(&termios_p, speed);
 }
