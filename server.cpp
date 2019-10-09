@@ -34,10 +34,11 @@ string Server::getFileName()
 void Server::run_func()
 {
     char buff[BUFF_SIZE];
+    int res = getInterface()->read(buff, BUFF_SIZE, 2*DELAY_MSEC);
 
-    int res = getInterface()->read(buff, BUFF_SIZE, DELAY_MSEC*1000);
-
-    cout << "server get res="<< res << endl;
+#ifdef VERBOSE_PRINT
+    cout << "server get res=" << res << endl;
+#endif
 
     if(res > 0)
     {
@@ -47,10 +48,21 @@ void Server::run_func()
         }
         isGetData = true;
 
+#ifdef ECHO_RESPONSE
+        getInterface()->write(buff, res);
+#endif
         for(int iii = 0; iii<res; iii++)
         {
+#ifdef VERBOSE_PRINT
+            std::cout << std::hex;
+            std::cout << (unsigned int)buff[iii] << " ";
+#endif
             ArrayData.push_back(buff[iii]);
-        }
+        }        
+#ifdef VERBOSE_PRINT
+        std::cout << std::endl;
+#endif
+
     }
     else
     {

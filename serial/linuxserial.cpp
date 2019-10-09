@@ -9,12 +9,10 @@
 
 LinuxSerial::LinuxSerial()
 {
-
 }
 
 LinuxSerial::~LinuxSerial()
 {
-
 }
 
 int LinuxSerial::open(const char*pathname, int flags)
@@ -27,9 +25,12 @@ int LinuxSerial::close()
     return (fd > 0) ? (::close(fd)) : 0;
 }
 
-size_t LinuxSerial::read(char*buff, size_t len)
+size_t LinuxSerial::read(char* buff, size_t len, size_t timeout)
 {
-    return ::read(fd, buff, len);
+	if(this->select(timeout * 1000))
+		return ::read(fd, buff, len);
+	else
+		return 0;
 }
 
 size_t LinuxSerial::write(const char*buff, size_t len)
@@ -53,7 +54,7 @@ int LinuxSerial::select(size_t timeout)
     return (resfds <= 0) ? 0 : 1;
 }
 
-int LinuxSerial::tcsetattr(int optional_actions, const termios*termios_p)
+int LinuxSerial::tcsetattr(int /*optional_actions*/, const termios*/*termios_p*/)
 {
 
 }

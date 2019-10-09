@@ -21,7 +21,7 @@ public:
     virtual ~ISerial() = default;
     virtual int open (const char *pathname, int flags) = 0;
     virtual int close () = 0;
-    virtual size_t read(char* buff, size_t len) = 0;
+    virtual size_t read(char* buff, size_t len, size_t timeout) = 0;
     virtual size_t write(const char* buff, size_t len) = 0;
     virtual int tcsetattr(int optional_actions, const termios* termios_p) = 0;
 

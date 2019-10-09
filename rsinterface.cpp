@@ -38,7 +38,7 @@ bool RSInterface::open()
 
     isFirstByte = true;
 
-    _channelId = serial->open(params->getDevPath().c_str(), O_RDWR /*O_RDWR | O_NOCTTY | O_NONBLOCK*/);
+    _channelId = serial->open(params->getDevPath().c_str(), /*O_RDWR*/ O_RDWR | O_NOCTTY | O_NDELAY);
 
     if (_channelId < 0)
     {
@@ -96,10 +96,6 @@ bool RSInterface::open()
     {
         newtio0.c_cflag = params->getBaudRate() | params->getByteSize() | CLOCAL | CREAD | (int)params->getParity();
 
-        newtio0.c_cflag &= ~CRTSCTS;
-        newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-        newtio0.c_oflag &= ~OPOST;
-
         newtio0.c_oflag = 0;
         newtio0.c_lflag = 0;
         newtio0.c_cc[VTIME] = 0;    // inter-character timer unused
@@ -110,7 +106,39 @@ bool RSInterface::open()
         serial->tcsetattr (_channelId, &newtio0);
     }
 
-    //cfmakeraw(&newtio0);
+
+//            std::cout <<"Set Pasha settings" << std::endl;
+//            //_channelId = open(port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+
+
+//            fcntl(_channelId, F_SETFL, FNDELAY); // read with no delay
+//            tcgetattr(_channelId, &newtio0);
+
+//            cfsetispeed(&newtio0, params->getBaudRate());
+//            cfsetospeed(&newtio0, params->getBaudRate());
+
+//            newtio0.c_cflag |= (CLOCAL | CREAD);
+//            newtio0.c_cflag |= PARENB;
+//            //(int)params->getParity();//PARENB; // enable parity bit
+//            newtio0.c_cflag &= ~PARODD;
+
+//            newtio0.c_cflag &= ~CSTOPB;
+//            newtio0.c_cflag &= ~CSIZE;                                                     // bit mask for data bits
+//            newtio0.c_cflag |= params->getByteSize();                                                        // 8 data bits
+//            newtio0.c_cflag &= ~CRTSCTS;                                                   // disable hardware flow control
+//            newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);                            // raw mode!
+//            newtio0.c_iflag &= ~(INPCK | ISTRIP | IUCLC | IGNCR | ICRNL | INLCR | PARMRK); // raw mode!
+//            newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);                                    // disable software flow control
+//            newtio0.c_oflag &= ~OPOST;
+//            newtio0.c_cflag &= ~CBAUD;
+//            newtio0.c_cflag |= B9600;
+//            tcsetattr(_channelId, TCSANOW, &newtio0);
+
+//            /*********************************/
+//            sleep(2); // required to make flush work, for some reason
+//            tcflush(_channelId, TCIOFLUSH);
+
+
 
     return true;
 }
@@ -122,20 +150,7 @@ bool RSInterface::close()
 
 int RSInterface::read(char *data, int size, int timeout)
 {
-
-    return serial->read(data, size);
-
-    //LINUX
-//    struct timeval tv;
-//    fd_set fds;
-//    int resfds;
-//    FD_ZERO (&fds);
-//    FD_SET (_channelId, &fds);
-//    tv.tv_sec = (int)(timeout / 1000000);
-//    tv.tv_usec = timeout - tv.tv_sec*1000000;
-    //resfds = select(_channelId + 1, &fds, NULL, NULL, &tv);
-    //return (resfds <= 0) ? 0 : read(_channelId, data, size);
-
+    return serial->read(data, size, timeout);
 }
 
 int RSInterface::write(const char *data, int size)

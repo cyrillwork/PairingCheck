@@ -1,5 +1,7 @@
 //This is an open source non-commercial project. Dear PVS-Studio, please check it.
 
+//#define ECHO_RESPONSE
+
 #include <iostream>
 #include <getopt.h>
 
@@ -9,23 +11,27 @@
 
 using namespace std;
 
-enum
+enum class PairingType
 {
     NONE = 0,   // режим не установлен
     CLIENT,     // клиент
     SERVER      // сервер
 };
 
+static const char* defaultConfServer = "config/server.json";
+static const char* defaultConfClient = "config/client.json";
+
+
 void printErrorMessage()
 {
     cout << "Error. Usage: " << endl;
-    cout << "Server mode: PairingCheck --server --config filename.json " << endl;
-    cout << "Client mode: PairingCheck --client filename --config filename.json" << endl;
-    cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;
-
-    cout << "For generate config file: " << endl;
+    cout << "Server mode: PairingCheck --server [--config filename.json]" << endl;
+    cout << "Client mode: PairingCheck --client filename [--config filename.json]" << endl;
+    cout << "Default params: speed 9600, size 8bit, parity none, stop bite 1" << endl;    
+    cout << "Default conf files " << endl << "for server: " <<  defaultConfServer << endl << "for client: " << defaultConfClient << endl;
     cout << "PairingCheck --generate type[RS232|UDP]" << endl;
 }
+
 
 TypeInterface interfaceFactory(TypeParams params)
 {
@@ -53,14 +59,28 @@ TypeInterface interfaceFactory(TypeParams params)
     return interface;
 }
 
+
+TypeParams getParamFromFile(const char* fileName)
+{
+    ConfigFileParser parser(fileName);
+    if(!parser.Init())
+    {
+        cout << "Error parse file " << optarg << endl;
+        printErrorMessage();
+        exit(0);
+    }
+    return parser.getParams();
+}
+
+
 int main(int argc, char *argv[])
 {
     std::string fileName;
-    int Mode = NONE;
+    PairingType Mode = PairingType::NONE;
 
     TypeParams params = nullptr;
 
-    if(argc < 3)
+    if(argc < 2)
     {
         printErrorMessage();
     }
@@ -97,24 +117,25 @@ int main(int argc, char *argv[])
             switch(c)
             {
                 case 's':
-                    Mode = SERVER;
+                    Mode = PairingType::SERVER;
                 break;
 
                 case 'c':
-                    Mode = CLIENT;
+                    Mode = PairingType::CLIENT;
                     fileName = optarg;
                 break;
 
                 case 'f':
                 {
-                    ConfigFileParser parser(optarg);
-                    if(!parser.Init())
-                    {
-                        cout << "Error parse file " << optarg << endl;
-                        printErrorMessage();
-                        exit(0);
-                    }
-                    params = parser.getParams();
+                    params = getParamFromFile(optarg);
+//                    ConfigFileParser parser(optarg);
+//                    if(!parser.Init())
+//                    {
+//                        cout << "Error parse file " << optarg << endl;
+//                        printErrorMessage();
+//                        exit(0);
+//                    }
+//                    params = parser.getParams();
 
                 }
                 break;
@@ -143,6 +164,27 @@ int main(int argc, char *argv[])
             }
         }
 
+        if(params == nullptr)
+        {
+            if(Mode == PairingType::CLIENT)
+            {
+                params = getParamFromFile(defaultConfClient);
+            }
+            else
+                if(Mode == PairingType::SERVER)
+                {
+                    params = getParamFromFile(defaultConfServer);
+                }
+
+            if(params == nullptr)
+            {
+                printErrorMessage();
+                cout << "Do not find config file" << endl;
+                return 0;
+            }
+        }
+
+
         TypeInterface interface = interfaceFactory(params);
 
         if(!interface)
@@ -160,7 +202,7 @@ int main(int argc, char *argv[])
 
         switch(Mode)
         {
-            case CLIENT:
+            case PairingType::CLIENT:
             {
                 try
                 {
@@ -176,7 +218,7 @@ int main(int argc, char *argv[])
                 }
             }
             break;
-            case SERVER:
+            case PairingType::SERVER:
             {
                 try
                 {

@@ -29,9 +29,39 @@ void Client::run_func()
     int res = fileStream.gcount();
     if(res > 0)
     {
-        int res_send = getInterface()->write(buff, res);
+
+        int res_send = getInterface()->write(buff, res);        
         count_send += res_send;
         std::cout << "Send " << count_send << " bytes" << std::endl;
+
+#ifdef ECHO_RESPONSE
+        { // read
+            int count1 = 0;
+            std::cout << std::hex;
+            do {
+                res = getInterface()->read(buff, BUFF_SIZE, DELAY_MSEC*1000);
+                if(res > 0)
+                {
+                    for(int iii = 0; iii < res; ++iii)
+                    {
+                        std::cout << " " << buff[iii];
+                    }
+                }
+
+                count1 += res;
+
+                if(count1 == res_send)
+                {
+                    break;
+                }
+
+            } while ( res != 0 );
+
+            std::cout << std::endl;
+            std::cout << std::dec;
+        }
+#endif
+
     }
     else
     {

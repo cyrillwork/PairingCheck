@@ -3,8 +3,10 @@
 #ifndef CONST_H
 #define CONST_H
 
-#define BUFF_SIZE 32
-#define DELAY_MSEC 300
+#define BUFF_SIZE 16
+#define DELAY_MSEC 50
+
+//300
 //#define UDP_PORT 12345
 
 //#define PARITY "None"
