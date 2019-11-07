@@ -32,7 +32,6 @@ void printErrorMessage()
     cout << "PairingCheck --generate type[RS232|UDP]" << endl;
 }
 
-
 TypeInterface interfaceFactory(TypeParams params)
 {
     TypeInterface interface = nullptr;
@@ -40,8 +39,8 @@ TypeInterface interfaceFactory(TypeParams params)
     switch (params->getType())
     {
         case TypeParam::RS232:
-        {//set up RS-interface
-            interface = make_shared<RSInterface>(params);
+        {   //set up RS-interface
+            interface = make_shared<RSInterface>(params, getSerial());
         }
         break;
 
@@ -240,10 +239,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    if(params)
-    {
-        delete params;
-    }
 
     return 0;
 }

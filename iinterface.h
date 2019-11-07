@@ -30,7 +30,6 @@ using TypeInterface = std::shared_ptr<IInterface>;
 class IInterface
 {
 public:
-
     IInterface(TypeParams p): params(p) {}
 
     virtual ~IInterface() = default;

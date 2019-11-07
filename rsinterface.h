@@ -24,7 +24,7 @@ class RSInterface : public IInterface
 {
 public:
 
-    RSInterface(TypeParams _params);
+    RSInterface(TypeParams _params, PtrSerial _serial);
 
     ~RSInterface() override;
 
@@ -46,7 +46,7 @@ private:
     termios newtio0;
     TypeParamsRS params;
 
-    std::unique_ptr<ISerial> serial;
+    PtrSerial serial;
 };
 
 #endif // RS_INTERFACE_H

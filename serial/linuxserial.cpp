@@ -67,3 +67,12 @@ int LinuxSerial::cfsetospeed(speed_t speed)
 {
     return ::cfsetospeed(&termios_p, speed);
 }
+
+PtrSerial getSerial()
+{
+#ifdef _WIN32
+    return make_shared<WinSerial>();
+#else
+    return std::make_shared<LinuxSerial>();
+#endif
+}

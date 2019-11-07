@@ -14,9 +14,10 @@ ParamsRS232::ParamsRS232(ParamsRS232 &params):
 ParamsRS232::ParamsRS232(string _devPath, Parity _parity, int _speed, ByteSize _byteSize):
     IParams(_devPath),
     parity(_parity),
-    speed(_speed),
+
     byteSize(_byteSize)
 {
+    speed = _speed;
 }
 
 std::string ParamsRS232::getBaudRateString()

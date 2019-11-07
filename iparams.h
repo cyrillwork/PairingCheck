@@ -14,6 +14,7 @@
 #endif
 
 #include <unistd.h>
+#include <memory>
 
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
@@ -22,7 +23,8 @@
 #include "rapidjson/prettywriter.h"
 
 class IParams;
-using TypeParams = IParams*; //std::shared_ptr<IParams>;
+//using TypeParams = IParams*;
+using TypeParams = std::shared_ptr<IParams>;
 
 enum class TypeParam : int
 {
@@ -36,6 +38,7 @@ class IParams
 {
 public:
     IParams(std::string dev): devPath(dev) {}
+
     virtual ~IParams() = default;
     virtual const std::string getName() const = 0;
     virtual TypeParam getType() const = 0;

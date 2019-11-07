@@ -4,7 +4,8 @@
 #include "iparams.h"
 
 class ParamsUDP;
-using TypeParamsUDP = ParamsUDP*;
+//using TypeParamsUDP = ParamsUDP*;
+using TypeParamsUDP = std::shared_ptr<ParamsUDP>;
 
 class ParamsUDP : public IParams
 {

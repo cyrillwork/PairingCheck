@@ -12,7 +12,8 @@ UDPInterface::UDPInterface(TypeParams _params):
     WSAStartup(0x0101,&wsdata);
 #endif
 
-    params = dynamic_cast<TypeParamsUDP>(_params);
+    params = std::dynamic_pointer_cast<ParamsUDP>(_params);
+
     if(params)
     {
         std::cout << "constructor UDP Interface devPath=" << params->getDevPath() << std::endl;

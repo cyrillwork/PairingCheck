@@ -103,12 +103,12 @@ TypeParams ConfigFileParser::factoryParams(TypeParam type)
 
     if(type == TypeParam::RS232)
     {
-        result = new ParamsRS232("/dev/ttyS0");
+        result = std::make_shared<ParamsRS232>("/dev/ttyS0");
     }
     else
         if(type == TypeParam::UDP)
         {
-            result = new ParamsUDP();
+            result = std::make_shared<ParamsUDP>();
         }
 
     return result;

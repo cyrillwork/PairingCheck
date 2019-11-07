@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <memory>
 
 #ifdef _WIN32
     #define NOMINMAX //иначе API windows определит макросы min и max, конфликтующие с std::max и std::min в vector
@@ -15,6 +16,9 @@
 #else
     #include <termios.h>
 #endif
+
+class ISerial;
+using PtrSerial = std::shared_ptr<ISerial>;
 
 class ISerial
 {

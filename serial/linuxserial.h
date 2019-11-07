@@ -1,7 +1,10 @@
+#pragma once
+
 #ifndef LINUXSERIAL_H
 #define LINUXSERIAL_H
 
-#include "serial/iserial.h"
+#include "iserial.h"
+#include <memory>
 
 class LinuxSerial: public ISerial
 {
@@ -30,5 +33,9 @@ public:
 private:
 
 };
+
+
+PtrSerial getSerial();
+
 
 #endif // LINUXSERIAL_H

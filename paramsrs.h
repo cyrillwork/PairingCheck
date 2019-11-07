@@ -40,7 +40,8 @@ enum ByteSize
 
 
 class ParamsRS232;
-using TypeParamsRS = ParamsRS232*;//std::unique_ptr<ParamsRS>;
+//using TypeParamsRS = ParamsRS232*;
+using TypeParamsRS = std::shared_ptr<ParamsRS232>;
 
 using std::string;
 

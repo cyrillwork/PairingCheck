@@ -4,18 +4,13 @@
 #include <thread>
 
 
-RSInterface::RSInterface(TypeParams _params):
-    IInterface(_params),
-    _channelId(-1)
+RSInterface::RSInterface(TypeParams _params, PtrSerial _serial):
+    IInterface(_params),    
+    _channelId(-1),
+    serial(_serial)
 {
+    params = std::dynamic_pointer_cast<ParamsRS232>(_params);
 
-#ifdef _WIN32
-    serial = make_unique<WinSerial>();
-#else
-    serial = make_unique<LinuxSerial>();
-#endif
-
-    params = dynamic_cast<TypeParamsRS>(_params);
     if(params)
     {
         std::cout << "constructor RSInterface devPath=" << params->getDevPath() << std::endl;
@@ -93,15 +88,21 @@ bool RSInterface::open()
     }
     else
     {
-        newtio0.c_cflag = params->getByteSize() | CLOCAL | CREAD | (int)params->getParity();
+        serial->cfsetospeed( params->getBaudRate() );
+        serial->cfsetispeed( params->getBaudRate() );
 
+        newtio0.c_cflag = params->getByteSize() | CLOCAL | CREAD | (int)params->getParity();
         newtio0.c_oflag = 0;
         newtio0.c_lflag = 0;
         newtio0.c_cc[VTIME] = 10;    // inter-character timer unused
         newtio0.c_cc[VMIN]  = 0;    // blocking read until  chars received
 
-        serial->cfsetospeed( params->getBaudRate() );
-        serial->cfsetispeed( params->getBaudRate() );
+
+        newtio0.c_cflag &= ~CRTSCTS;                                                   // disable hardware flow control
+        newtio0.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);                            // raw mode!
+        newtio0.c_iflag &= ~(INPCK | ISTRIP | IUCLC | IGNCR | ICRNL | INLCR | PARMRK); // raw mode!
+        newtio0.c_iflag &= ~(IXON | IXOFF | IXANY);                                    // disable software flow control
+        newtio0.c_oflag &= ~OPOST;
 
         serial->tcsetattr (_channelId, &newtio0);
     }
