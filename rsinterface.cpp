@@ -13,7 +13,7 @@ RSInterface::RSInterface(TypeParams _params, PtrSerial _serial):
 
     if(params)
     {
-        std::cout << "constructor RSInterface devPath=" << params->getDevPath() << std::endl;
+        //std::cout << "constructor RSInterface devPath=" << params->getDevPath() << std::endl;
     }
     else
     {
